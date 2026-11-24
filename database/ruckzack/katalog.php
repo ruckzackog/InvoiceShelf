@@ -52,8 +52,17 @@ return [
 
         // Frame and phase packages (offers and project invoices)
         ['match' => ['Planung und Anforderungsanalyse'], 'name' => 'Konzept und Workshop', 'description' => $frameKonzept],
-        ['match' => ['Design und Prototyping'], 'name' => 'Design und Prototyping', 'description' => 'Gestaltung der wichtigsten Seiten als klickbarer Prototyp für Desktop und Smartphone, mit einer Korrekturrunde.'],
-        ['match' => ['Technische Entwicklung'], 'name' => 'Technische Entwicklung', 'description' => 'Umsetzung auf Basis des freigegebenen Designs.'],
+        ['match' => ['Design und Prototyping'], 'name' => 'Design und Prototyping', 'description' => implode("\n", [
+            'Dieses Arbeitspaket umfasst die Gestaltung als klickbaren Prototyp.',
+            '- Klickbarer Prototyp: Gestaltung der wichtigsten Seiten für Desktop und Smartphone',
+            '- Abstimmung: Gemeinsames Durchgehen und eine Korrekturrunde',
+        ])],
+        ['match' => ['Technische Entwicklung'], 'name' => 'Technische Entwicklung', 'description' => implode("\n", [
+            'Dieses Arbeitspaket umfasst die technische Umsetzung auf Basis des freigegebenen Designs.',
+            '- Einrichtung: System, Hosting und Staging-Umgebung aufsetzen',
+            '- Umsetzung: Seitenvorlagen und Funktionen nach freigegebenem Design',
+            '- Inhalte: Übernahme der gelieferten Texte und Bilder',
+        ])],
         ['match' => ['Projektmanagement und Qualitätssicherung'], 'name' => 'Projektmanagement und Qualitätssicherung', 'description' => 'Abstimmung, Projektsteuerung und laufende Qualitätskontrolle.'],
         ['match' => ['Launch und Go-Live'], 'name' => 'Test, Go-live und Einschulung', 'description' => $frameGoLive],
 
