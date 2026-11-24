@@ -1762,6 +1762,7 @@
     "footer_preview": "Fußzeile mit Firmendaten und Seitenzahl im PDF",
     "page_hint": "Seitenumbrüche sehen Sie genau in der Vorschau.",
     "insert": "Einfügen",
-    "form_hint_document": "Notiz und Zusatzfelder der alten Vorlage sind bei dieser Vorlage ausgeblendet. Der Text steht im Dokument."
+    "form_hint_document": "Notiz und Zusatzfelder der alten Vorlage sind bei dieser Vorlage ausgeblendet. Der Text steht im Dokument.",
+    "preview_pdf": "PDF-Vorschau"
   }
 }

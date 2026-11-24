@@ -92,15 +92,19 @@
             {{ $t(`angebot_document.${view}`) }}
           </button>
         </div>
-        <span class="text-sm text-gray-500">{{ $t('angebot_document.mode_hint') }}</span>
+        <span class="hidden text-sm text-gray-500 lg:inline">{{ $t('angebot_document.mode_hint') }}</span>
+        <BaseButton class="ml-auto" variant="primary-outline" type="button" :loading="isSaving" @click="previewDocument">
+          <template #left="slotProps">
+            <BaseIcon v-if="!isSaving" :class="slotProps.class" name="EyeIcon" />
+          </template>
+          {{ isEdit ? $t('angebot_document.preview_pdf') : $t('angebot_document.save_and_preview') }}
+        </BaseButton>
       </div>
 
       <EstimateDocumentEditor
         v-if="isDocumentTemplate"
         v-show="documentView === 'document'"
-        :is-edit="isEdit"
         @edit-positions="documentView = 'form'"
-        @preview="previewDocument"
       />
 
       <BaseScrollPane v-show="!isDocumentTemplate || documentView === 'form'">

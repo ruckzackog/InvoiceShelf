@@ -1768,6 +1768,7 @@
     "footer_preview": "Footer with company details and page number in the PDF",
     "page_hint": "The preview shows the exact page breaks.",
     "insert": "Insert",
-    "form_hint_document": "Notes and custom fields of the old template are hidden for this template. The text lives in the document."
+    "form_hint_document": "Notes and custom fields of the old template are hidden for this template. The text lives in the document.",
+    "preview_pdf": "PDF preview"
   }
 }

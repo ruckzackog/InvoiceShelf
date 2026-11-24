@@ -2,75 +2,94 @@
   <div class="doc-editor">
     <div v-if="editor" class="doc-toolbar">
       <div class="doc-toolbar-group">
-        <button type="button" :title="$t('angebot_document.undo')" @click="run((c) => c.undo())">↶</button>
-        <button type="button" :title="$t('angebot_document.redo')" @click="run((c) => c.redo())">↷</button>
-      </div>
-
-      <div class="doc-toolbar-group">
-        <button type="button" :class="{ active: editor.isActive('paragraph') }" @click="run((c) => c.setParagraph())">
-          {{ $t('angebot_document.paragraph') }}
+        <button type="button" class="doc-icon" :title="$t('angebot_document.undo')" @click="run((c) => c.undo())">
+          <ArrowUturnLeftIcon />
         </button>
-        <button
-          v-for="level in [1, 2, 3]"
-          :key="level"
-          type="button"
-          :class="{ active: editor.isActive('heading', { level }) }"
-          @click="run((c) => c.toggleHeading({ level }))"
-        >
-          {{ $t(`angebot_document.heading_${level}`) }}
+        <button type="button" class="doc-icon" :title="$t('angebot_document.redo')" @click="run((c) => c.redo())">
+          <ArrowUturnRightIcon />
         </button>
       </div>
 
-      <div class="doc-toolbar-group">
-        <button type="button" class="font-bold" :title="$t('angebot_document.bold')" :class="{ active: editor.isActive('bold') }" @click="run((c) => c.toggleBold())">B</button>
-        <button type="button" class="italic" :title="$t('angebot_document.italic')" :class="{ active: editor.isActive('italic') }" @click="run((c) => c.toggleItalic())">I</button>
-        <button type="button" class="underline" :title="$t('angebot_document.underline')" :class="{ active: editor.isActive('underline') }" @click="run((c) => c.toggleUnderline())">U</button>
-      </div>
-
-      <div class="doc-toolbar-group">
-        <button type="button" :title="$t('angebot_document.bullet_list')" :class="{ active: editor.isActive('bulletList') }" @click="run((c) => c.toggleBulletList())">•&nbsp;{{ $t('angebot_document.bullet_list') }}</button>
-        <button type="button" :title="$t('angebot_document.ordered_list')" :class="{ active: editor.isActive('orderedList') }" @click="run((c) => c.toggleOrderedList())">1.</button>
-      </div>
+      <BaseDropdown width-class="w-48">
+        <template #activator>
+          <span class="doc-style-select" :title="$t('angebot_document.paragraph')">
+            {{ currentStyle.label }}
+            <ChevronDownIcon />
+          </span>
+        </template>
+        <BaseDropdownItem v-for="style in styles" :key="style.key" @click="run(style.apply)">
+          <span :class="style.preview">{{ style.label }}</span>
+        </BaseDropdownItem>
+      </BaseDropdown>
 
       <div class="doc-toolbar-group">
         <button
-          v-for="align in ['left', 'center', 'right']"
-          :key="align"
+          v-for="mark in marks"
+          :key="mark.name"
           type="button"
-          :title="$t(`angebot_document.align_${align}`)"
-          :class="{ active: editor.isActive({ textAlign: align }) }"
-          @click="run((c) => c.setTextAlign(align))"
+          class="doc-icon"
+          :title="$t(`angebot_document.${mark.name}`)"
+          :class="{ active: editor.isActive(mark.name) }"
+          @click="run(mark.toggle)"
         >
-          {{ alignSymbols[align] }}
+          <component :is="mark.icon" />
         </button>
       </div>
 
       <div class="doc-toolbar-group">
-        <BaseDropdown width-class="w-56">
-          <template #activator>
-            <span class="doc-toolbar-menu">{{ $t('angebot_document.table') }} ▾</span>
-          </template>
-          <BaseDropdownItem @click="run((c) => c.insertTable({ rows: 3, cols: 3, withHeaderRow: true }))">
-            {{ $t('angebot_document.table') }} 3 × 3
-          </BaseDropdownItem>
-          <template v-if="editor.isActive('table')">
-            <BaseDropdownItem @click="run((c) => c.addRowAfter())">{{ $t('angebot_document.add_row') }}</BaseDropdownItem>
-            <BaseDropdownItem @click="run((c) => c.addColumnAfter())">{{ $t('angebot_document.add_column') }}</BaseDropdownItem>
-            <BaseDropdownItem @click="run((c) => c.deleteRow())">{{ $t('angebot_document.delete_row') }}</BaseDropdownItem>
-            <BaseDropdownItem @click="run((c) => c.deleteColumn())">{{ $t('angebot_document.delete_column') }}</BaseDropdownItem>
-            <BaseDropdownItem @click="run((c) => c.deleteTable())">{{ $t('angebot_document.delete_table') }}</BaseDropdownItem>
-          </template>
-        </BaseDropdown>
+        <button type="button" class="doc-icon" :title="$t('angebot_document.bullet_list')" :class="{ active: editor.isActive('bulletList') }" @click="run((c) => c.toggleBulletList())">
+          <ListBulletIcon />
+        </button>
+        <button type="button" class="doc-icon" :title="$t('angebot_document.ordered_list')" :class="{ active: editor.isActive('orderedList') }" @click="run((c) => c.toggleOrderedList())">
+          <NumberedListIcon />
+        </button>
+      </div>
 
+      <div class="doc-toolbar-group">
+        <button
+          v-for="align in alignments"
+          :key="align.value"
+          type="button"
+          class="doc-icon"
+          :title="$t(`angebot_document.align_${align.value}`)"
+          :class="{ active: editor.isActive({ textAlign: align.value }) }"
+          @click="run((c) => c.setTextAlign(align.value))"
+        >
+          <component :is="align.icon" />
+        </button>
+      </div>
+
+      <!-- Only while the cursor is in a table -->
+      <BaseDropdown v-if="editor.isActive('table')" width-class="w-48">
+        <template #activator>
+          <span class="doc-style-select doc-table-select">
+            <TableCellsIcon />
+            {{ $t('angebot_document.table') }}
+            <ChevronDownIcon />
+          </span>
+        </template>
+        <BaseDropdownItem @click="run((c) => c.addRowAfter())">{{ $t('angebot_document.add_row') }}</BaseDropdownItem>
+        <BaseDropdownItem @click="run((c) => c.addColumnAfter())">{{ $t('angebot_document.add_column') }}</BaseDropdownItem>
+        <BaseDropdownItem @click="run((c) => c.deleteRow())">{{ $t('angebot_document.delete_row') }}</BaseDropdownItem>
+        <BaseDropdownItem @click="run((c) => c.deleteColumn())">{{ $t('angebot_document.delete_column') }}</BaseDropdownItem>
+        <BaseDropdownItem @click="run((c) => c.deleteTable())">{{ $t('angebot_document.delete_table') }}</BaseDropdownItem>
+      </BaseDropdown>
+
+      <div class="doc-toolbar-end">
         <BaseDropdown width-class="w-72">
           <template #activator>
-            <span class="doc-toolbar-menu doc-toolbar-insert" @click="loadBausteine">
-              + {{ $t('angebot_document.insert') }} ▾
+            <span class="doc-insert-button" @click="loadBausteine">
+              <PlusIcon />
+              {{ $t('angebot_document.insert') }}
+              <ChevronDownIcon />
             </span>
           </template>
           <div class="doc-menu-section">{{ $t('angebot_document.insert_block') }}</div>
           <BaseDropdownItem v-for="type in BLOCK_TYPES" :key="type" @click="insertBlock(type)">
             {{ $t(`angebot_document.blocks.${type}`) }}
+          </BaseDropdownItem>
+          <BaseDropdownItem @click="run((c) => c.insertTable({ rows: 3, cols: 3, withHeaderRow: true }))">
+            {{ $t('angebot_document.table') }}
           </BaseDropdownItem>
           <div class="doc-menu-section">{{ $t('angebot_document.insert_baustein') }}</div>
           <BaseDropdownItem v-for="note in bausteine" :key="note.id" @click="insertBaustein(note)">
@@ -84,12 +103,6 @@
             {{ $t(`angebot_document.fields.${key}`) }}
           </BaseDropdownItem>
         </BaseDropdown>
-      </div>
-
-      <div class="doc-toolbar-group doc-toolbar-end">
-        <button type="button" class="doc-toolbar-primary" @click="$emit('preview')">
-          {{ isEdit ? $t('angebot_document.preview') : $t('angebot_document.save_and_preview') }}
-        </button>
       </div>
     </div>
 
@@ -115,7 +128,23 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, markRaw, onBeforeUnmount, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import {
+  ArrowUturnLeftIcon,
+  ArrowUturnRightIcon,
+  Bars3BottomLeftIcon,
+  Bars3BottomRightIcon,
+  Bars3Icon,
+  BoldIcon,
+  ChevronDownIcon,
+  ItalicIcon,
+  ListBulletIcon,
+  NumberedListIcon,
+  PlusIcon,
+  TableCellsIcon,
+  UnderlineIcon,
+} from '@heroicons/vue/20/solid'
 import { EditorContent, useEditor } from '@tiptap/vue-3'
 import { useEstimateStore } from '@/scripts/admin/stores/estimate'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
@@ -126,18 +155,38 @@ import defaultDocument from './defaultDocument'
 import '@/css/angebot-fonts.css'
 import '@/css/angebot-document.css'
 
-defineProps({
-  isEdit: { type: Boolean, default: false },
-})
+const emit = defineEmits(['edit-positions'])
 
-const emit = defineEmits(['edit-positions', 'preview'])
+const { t } = useI18n()
 
 const estimateStore = useEstimateStore()
 const companyStore = useCompanyStore()
 const notesStore = useNotesStore()
 const itemStore = useItemStore()
 
-const alignSymbols = { left: '⇤', center: '↔', right: '⇥' }
+const marks = [
+  { name: 'bold', icon: markRaw(BoldIcon), toggle: (c) => c.toggleBold() },
+  { name: 'italic', icon: markRaw(ItalicIcon), toggle: (c) => c.toggleItalic() },
+  { name: 'underline', icon: markRaw(UnderlineIcon), toggle: (c) => c.toggleUnderline() },
+]
+
+const alignments = [
+  { value: 'left', icon: markRaw(Bars3BottomLeftIcon) },
+  { value: 'center', icon: markRaw(Bars3Icon) },
+  { value: 'right', icon: markRaw(Bars3BottomRightIcon) },
+]
+
+const styles = computed(() => [
+  { key: 'paragraph', label: t('angebot_document.paragraph'), preview: 'text-sm', apply: (c) => c.setParagraph() },
+  { key: 'h1', level: 1, label: t('angebot_document.heading_1'), preview: 'text-lg font-semibold', apply: (c) => c.setHeading({ level: 1 }) },
+  { key: 'h2', level: 2, label: t('angebot_document.heading_2'), preview: 'text-base font-semibold', apply: (c) => c.setHeading({ level: 2 }) },
+  { key: 'h3', level: 3, label: t('angebot_document.heading_3'), preview: 'text-sm font-semibold', apply: (c) => c.setHeading({ level: 3 }) },
+])
+
+const currentStyle = computed(() => {
+  const active = styles.value.find((style) => style.level && editor.value?.isActive('heading', { level: style.level }))
+  return active || styles.value[0]
+})
 
 const company = computed(() => companyStore.selectedCompany)
 const senderLines = computed(() => {
@@ -218,41 +267,119 @@ function insertBaustein(note) {
 </script>
 
 <style>
-.doc-editor {
-  --doc-toolbar-height: 44px;
-}
-
 .doc-toolbar {
   position: sticky;
-  top: 64px;
+  top: 72px;
   z-index: 20;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px 2px;
   align-items: center;
-  padding: 6px 8px;
-  margin-bottom: 16px;
+  padding: 6px;
+  margin-bottom: 12px;
   background: #fff;
   border: 1px solid rgb(229 231 235);
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
 }
 
 .doc-toolbar-group {
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding-right: 6px;
-  border-right: 1px solid rgb(229 231 235);
+  gap: 1px;
+  padding: 0 4px;
+  border-left: 1px solid rgb(229 231 235);
 }
 
-.doc-toolbar-group:last-child {
-  border-right: 0;
+.doc-toolbar-group:first-child {
+  padding-left: 0;
+  border-left: 0;
 }
 
-.doc-toolbar-insert {
+.doc-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 8px;
+  font-size: 13px;
+  color: rgb(55 65 81);
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.doc-toolbar button.doc-icon {
+  width: 32px;
+  padding: 0;
+}
+
+.doc-toolbar button svg,
+.doc-style-select svg,
+.doc-insert-button svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.doc-toolbar button:hover {
+  background: rgb(243 244 246);
+}
+
+.doc-toolbar button.active {
+  background: var(--color-primary-50);
+  color: var(--color-primary-600);
+}
+
+.doc-style-select {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 136px;
+  height: 32px;
+  margin: 0 4px;
+  padding: 0 8px 0 10px;
+  font-size: 13px;
+  color: rgb(55 65 81);
+  border: 1px solid rgb(229 231 235);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.doc-style-select:hover {
+  border-color: rgb(209 213 219);
+}
+
+.doc-style-select svg {
+  color: rgb(156 163 175);
+}
+
+.doc-table-select {
+  width: auto;
+  gap: 6px;
+  border-color: var(--color-primary-200);
+}
+
+.doc-toolbar-end {
+  margin-left: auto;
+}
+
+.doc-insert-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 10px 0 8px;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--color-primary-600) !important;
+  color: var(--color-primary-600);
+  background: var(--color-primary-50);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.doc-insert-button:hover {
+  background: var(--color-primary-100);
 }
 
 .doc-menu-section {
@@ -262,43 +389,6 @@ function insertBaustein(note) {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: rgb(156 163 175);
-}
-
-.doc-toolbar-end {
-  margin-left: auto;
-}
-
-.doc-toolbar button,
-.doc-toolbar-menu {
-  display: inline-flex;
-  align-items: center;
-  min-width: 28px;
-  height: 30px;
-  padding: 0 8px;
-  font-size: 13px;
-  color: rgb(55 65 81);
-  border-radius: 6px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.doc-toolbar button:hover,
-.doc-toolbar-menu:hover {
-  background: rgb(243 244 246);
-}
-
-.doc-toolbar button.active {
-  background: var(--color-primary-100);
-  color: var(--color-primary-700);
-}
-
-.doc-toolbar .doc-toolbar-primary {
-  color: #fff;
-  background: var(--color-primary-500);
-}
-
-.doc-toolbar .doc-toolbar-primary:hover {
-  background: var(--color-primary-600);
 }
 
 .doc-canvas {
