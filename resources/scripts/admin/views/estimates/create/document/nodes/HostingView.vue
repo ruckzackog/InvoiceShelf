@@ -49,7 +49,7 @@ import { nodeViewProps } from '@tiptap/vue-3'
 import { useItemStore } from '@/scripts/admin/stores/item'
 import { useEstimateStore } from '@/scripts/admin/stores/estimate'
 import BlockFrame from './BlockFrame.vue'
-import { descriptionLines, formatDocMoney, isMonthly } from '../format'
+import { descriptionLines, formatDocMoney, isArchived, isMonthly } from '../format'
 
 const props = defineProps(nodeViewProps)
 
@@ -61,8 +61,9 @@ const editing = ref(false)
 // Hosting and care are billed per month: offer those items, or all when the
 // company has none with a monthly unit.
 const choices = computed(() => {
-  const monthly = itemStore.items.filter((item) => isMonthly(item.unit?.name))
-  return monthly.length ? monthly : itemStore.items
+  const active = itemStore.items.filter((item) => !isArchived(item))
+  const monthly = active.filter((item) => isMonthly(item.unit?.name))
+  return monthly.length ? monthly : active
 })
 
 const selectedIds = computed(() => (props.node.attrs.itemIds || []).map(Number))

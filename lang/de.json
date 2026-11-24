@@ -1806,6 +1806,11 @@
       "label": "Anrede",
       "sie": "Sie",
       "du": "du"
+    },
+    "mail_subject": {
+      "estimate": "Ihr Angebot {number} von {company}",
+      "invoice": "Ihre Rechnung {number} von {company}",
+      "payment": "Zahlungsbestätigung {number} von {company}"
     }
   }
 }

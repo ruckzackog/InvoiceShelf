@@ -128,6 +128,7 @@ import { useItemStore } from '@/scripts/admin/stores/item'
 import BlockFrame from './BlockFrame.vue'
 import AutoTextarea from './AutoTextarea.vue'
 import {
+  isArchived,
   isMonthly,
   formatDocMoney,
   formatMoneyInput,
@@ -148,7 +149,7 @@ const currencySymbol = computed(() => currency.value?.symbol || '€')
 
 // Monthly items (hosting, care, licences) go in the hosting block.
 const oneTimeArticles = computed(() =>
-  itemStore.items.filter((article) => !isMonthly(article.unit?.name))
+  itemStore.items.filter((article) => !isMonthly(article.unit?.name) && !isArchived(article))
 )
 
 function hasText(rows) {

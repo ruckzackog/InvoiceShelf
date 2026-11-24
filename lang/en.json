@@ -1812,6 +1812,11 @@
       "label": "Address",
       "sie": "Sie",
       "du": "du"
+    },
+    "mail_subject": {
+      "estimate": "Your estimate {number} from {company}",
+      "invoice": "Your invoice {number} from {company}",
+      "payment": "Payment receipt {number} from {company}"
     }
   }
 }

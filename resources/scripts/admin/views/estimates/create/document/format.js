@@ -123,3 +123,8 @@ export function formatMoneyInput(cents) {
 export function isMonthly(unitName) {
   return /^(monat|month)/i.test(String(unitName || '').trim())
 }
+
+/** Items renamed to "Alt: …" by the text catalog are retired: never offered again. */
+export function isArchived(item) {
+  return /^alt:\s/i.test(String(item?.name || ''))
+}
