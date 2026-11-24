@@ -255,7 +255,17 @@ test('hosting packages use the current item prices of the company only', functio
 });
 
 test('work package descriptions split into intro and activities', function () {
-    expect(DocumentRenderer::workPackage("Einleitung\n- Kick-off: Ziele klären\nSeitenstruktur"))->toBe([
+    // Written by the editor: rows start with "- ", so an intro line may contain a colon.
+    expect(DocumentRenderer::workPackage("Die Website soll: schnell sein\n- Kick-off: Ziele klären\n- Seitenstruktur"))->toBe([
+        'intro' => ['Die Website soll: schnell sein'],
+        'rows' => [
+            ['title' => 'Kick-off', 'text' => 'Ziele klären'],
+            ['title' => 'Seitenstruktur', 'text' => ''],
+        ],
+    ]);
+
+    // Older descriptions without "- ": split on the first line with a colon.
+    expect(DocumentRenderer::workPackage("Einleitung\nKick-off: Ziele klären\nSeitenstruktur"))->toBe([
         'intro' => ['Einleitung'],
         'rows' => [
             ['title' => 'Kick-off', 'text' => 'Ziele klären'],

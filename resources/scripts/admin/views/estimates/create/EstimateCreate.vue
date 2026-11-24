@@ -92,7 +92,6 @@
             {{ $t(`angebot_document.${view}`) }}
           </button>
         </div>
-        <span class="hidden text-sm text-gray-500 lg:inline">{{ $t('angebot_document.mode_hint') }}</span>
         <BaseButton class="ml-auto" variant="primary-outline" type="button" :loading="isSaving" @click="previewDocument">
           <template #left="slotProps">
             <BaseIcon v-if="!isSaving" :class="slotProps.class" name="EyeIcon" />

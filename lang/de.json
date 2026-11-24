@@ -1704,8 +1704,6 @@
   "angebot_document": {
     "document": "Dokument",
     "form": "Formular",
-    "mode_hint": "Positionen, Preise und Steuern bearbeiten Sie im Formular. Das Dokument zeigt sie live.",
-    "edit_positions": "Positionen bearbeiten",
     "insert_block": "Blöcke",
     "insert_baustein": "Bausteine",
     "insert_field": "Felder",
@@ -1763,6 +1761,16 @@
     "page_hint": "Seitenumbrüche sehen Sie genau in der Vorschau.",
     "insert": "Einfügen",
     "form_hint_document": "Notiz und Zusatzfelder der alten Vorlage sind bei dieser Vorlage ausgeblendet. Der Text steht im Dokument.",
-    "preview_pdf": "PDF-Vorschau"
+    "preview_pdf": "PDF-Vorschau",
+    "remove_package": "Arbeitspaket entfernen",
+    "package_name": "Name des Arbeitspakets",
+    "package_intro": "Kurze Beschreibung (optional)",
+    "remove_activity": "Tätigkeit entfernen",
+    "add_activity": "Tätigkeit",
+    "quantity": "Menge",
+    "price": "Preis netto",
+    "add_package": "Arbeitspaket",
+    "add_from_items": "Aus Artikeln übernehmen …",
+    "more_in_form": "Rabatt und Steuern im Formular"
   }
 }

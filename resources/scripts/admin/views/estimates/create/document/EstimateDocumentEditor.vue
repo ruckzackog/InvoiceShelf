@@ -559,4 +559,135 @@ function insertBaustein(note) {
 .doc-field--selected {
   outline: 1px solid #cb0c9f;
 }
+/* Work packages edited in place */
+
+.doc-package--editable {
+  position: relative;
+}
+
+.doc-package-title {
+  font-family: 'Angebot Josefin Sans', 'Josefin Sans', Arial, sans-serif !important;
+  font-size: 11pt !important;
+  font-weight: 700 !important;
+  margin: 0 0 1.5mm;
+}
+
+.doc-package-intro,
+.doc-activity textarea {
+  min-height: 1.5em;
+  resize: none;
+  overflow: hidden;
+  line-height: inherit;
+}
+
+.doc-package-intro {
+  margin: 0 0 2mm;
+}
+
+.doc-activity td {
+  position: relative;
+}
+
+.doc-activity-text {
+  padding-right: 7mm !important;
+}
+
+.doc-row-remove,
+.doc-package-remove {
+  position: absolute;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  border-radius: 4px;
+}
+
+.doc-row-remove {
+  top: 1.5mm;
+  right: 0.5mm;
+  width: 20px;
+  height: 20px;
+}
+
+.doc-package-remove {
+  top: -1mm;
+  right: -1mm;
+  width: 26px;
+  height: 26px;
+}
+
+.doc-row-remove svg,
+.doc-package-remove svg {
+  width: 15px;
+  height: 15px;
+}
+
+.doc-activity:hover .doc-row-remove,
+.doc-package--editable:hover .doc-package-remove {
+  display: inline-flex;
+}
+
+.doc-row-remove:hover,
+.doc-package-remove:hover {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+.doc-add-row td {
+  padding-top: 1mm !important;
+  padding-bottom: 1mm !important;
+  border-bottom: 0 !important;
+}
+
+.doc-link-button {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-primary-600);
+}
+
+.doc-link-button:hover {
+  text-decoration: underline;
+}
+
+.doc-link-button--muted {
+  color: #9ca3af;
+  margin-left: auto;
+}
+
+.doc-add-package {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin: -3mm 0 6mm;
+  padding: 2mm 3mm;
+  border: 1px dashed #e5e7eb;
+  border-radius: 6px;
+}
+
+.doc-from-items {
+  max-width: 260px;
+  padding: 2px 28px 2px 8px;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  color: #4b5563;
+  border-color: #e5e7eb;
+  border-radius: 6px;
+}
+
+.doc-price-inputs {
+  white-space: nowrap;
+}
+
+.doc-price-inputs .doc-number {
+  display: inline-block;
+  width: 3.2em;
+  text-align: right;
+  font-weight: 400;
+}
+
+.doc-price-inputs .doc-price {
+  width: 6.5em;
+}
 </style>

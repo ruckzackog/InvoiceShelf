@@ -1710,8 +1710,6 @@
   "angebot_document": {
     "document": "Document",
     "form": "Form",
-    "mode_hint": "Edit items, prices and taxes in the form. The document shows them live.",
-    "edit_positions": "Edit items",
     "insert_block": "Blocks",
     "insert_baustein": "Text blocks",
     "insert_field": "Fields",
@@ -1769,6 +1767,16 @@
     "page_hint": "The preview shows the exact page breaks.",
     "insert": "Insert",
     "form_hint_document": "Notes and custom fields of the old template are hidden for this template. The text lives in the document.",
-    "preview_pdf": "PDF preview"
+    "preview_pdf": "PDF preview",
+    "remove_package": "Remove work package",
+    "package_name": "Work package name",
+    "package_intro": "Short description (optional)",
+    "remove_activity": "Remove activity",
+    "add_activity": "Activity",
+    "quantity": "Quantity",
+    "price": "Net price",
+    "add_package": "Work package",
+    "add_from_items": "Add from items …",
+    "more_in_form": "Discount and taxes in the form"
   }
 }
