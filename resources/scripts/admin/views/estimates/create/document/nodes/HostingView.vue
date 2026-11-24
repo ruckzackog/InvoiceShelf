@@ -7,7 +7,7 @@
     </template>
 
     <div v-if="editing" class="doc-block-panel">
-      <label v-for="item in itemStore.items" :key="item.id" class="doc-block-option">
+      <label v-for="item in choices" :key="item.id" class="doc-block-option">
         <input type="checkbox" :checked="selectedIds.includes(item.id)" @change="toggle(item.id)" />
         {{ item.name }} · {{ formatDocMoney(item.price, currency) }}
       </label>
@@ -49,7 +49,7 @@ import { nodeViewProps } from '@tiptap/vue-3'
 import { useItemStore } from '@/scripts/admin/stores/item'
 import { useEstimateStore } from '@/scripts/admin/stores/estimate'
 import BlockFrame from './BlockFrame.vue'
-import { descriptionLines, formatDocMoney } from '../format'
+import { descriptionLines, formatDocMoney, isMonthly } from '../format'
 
 const props = defineProps(nodeViewProps)
 
@@ -57,6 +57,13 @@ const itemStore = useItemStore()
 const estimateStore = useEstimateStore()
 const currency = computed(() => estimateStore.newEstimate.selectedCurrency || null)
 const editing = ref(false)
+
+// Hosting and care are billed per month: offer those items, or all when the
+// company has none with a monthly unit.
+const choices = computed(() => {
+  const monthly = itemStore.items.filter((item) => isMonthly(item.unit?.name))
+  return monthly.length ? monthly : itemStore.items
+})
 
 const selectedIds = computed(() => (props.node.attrs.itemIds || []).map(Number))
 

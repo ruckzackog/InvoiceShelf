@@ -2,6 +2,7 @@
 <div class="doc-packages">
     @foreach ($estimate->items as $item)
         @php($package = $render::workPackage($item->description))
+        @php($hasText = collect($package['rows'])->contains(fn ($row) => $row['text'] !== ''))
         <div class="doc-package">
             <h3>{{ $item->name }}</h3>
             @foreach ($package['intro'] as $line)
@@ -11,15 +12,23 @@
                 @if ($package['rows'])
                     <thead>
                         <tr>
-                            <th style="width: 38%">@lang('pdf_angebot_activity')</th>
-                            <th>@lang('pdf_angebot_description')</th>
+                            @if ($hasText)
+                                <th style="width: 38%">@lang('pdf_angebot_activity')</th>
+                                <th>@lang('pdf_angebot_description')</th>
+                            @else
+                                <th colspan="2">@lang('pdf_angebot_service')</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($package['rows'] as $row)
                             <tr>
-                                <td>{{ $row['title'] }}</td>
-                                <td>{{ $row['text'] }}</td>
+                                @if ($hasText)
+                                    <td>{{ $row['title'] }}</td>
+                                    <td>{{ $row['text'] }}</td>
+                                @else
+                                    <td colspan="2">{{ $row['title'] }}</td>
+                                @endif
                             </tr>
                         @endforeach
                     </tbody>

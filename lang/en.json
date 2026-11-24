@@ -1640,6 +1640,7 @@
   "pdf_angebot_contact": "Your contact",
   "pdf_angebot_activity": "Activity",
   "pdf_angebot_description": "Description",
+  "pdf_angebot_service": "Service",
   "pdf_angebot_sum": "Total",
   "pdf_angebot_position": "Item",
   "pdf_angebot_amount": "Amount",
@@ -1777,6 +1778,7 @@
     "price": "Net price",
     "add_package": "Work package",
     "add_from_items": "Add from items …",
-    "more_in_form": "Discount and taxes in the form"
+    "more_in_form": "Discount and taxes in the form",
+    "monthly_warning": "Monthly price: belongs to hosting and care, not to the project cost."
   }
 }

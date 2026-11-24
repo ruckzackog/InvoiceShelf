@@ -12,6 +12,13 @@
           <TrashIcon />
         </button>
 
+        <p v-if="isMonthly(item.unit_name)" class="doc-warning" contenteditable="false">
+          {{ $t('angebot_document.monthly_warning') }}
+          <button type="button" class="doc-link-button" @click="removePackage(index)">
+            {{ $t('angebot_document.remove_package') }}
+          </button>
+        </p>
+
         <input
           class="doc-inline-input doc-package-title"
           :value="item.name"
@@ -29,8 +36,8 @@
         <table>
           <thead>
             <tr>
-              <th style="width: 38%">{{ $t('pdf_angebot_activity') }}</th>
-              <th>{{ $t('pdf_angebot_description') }}</th>
+              <th style="width: 38%">{{ hasText(rows) ? $t('pdf_angebot_activity') : $t('pdf_angebot_service') }}</th>
+              <th>{{ hasText(rows) ? $t('pdf_angebot_description') : '' }}</th>
             </tr>
           </thead>
           <tbody>
@@ -59,7 +66,7 @@
             <tr class="doc-add-row">
               <td colspan="2">
                 <button type="button" class="doc-link-button" @click="addRow(index)">
-                  + {{ $t('angebot_document.add_activity') }}
+                  + {{ hasText(rows) ? $t('angebot_document.add_activity') : $t('pdf_angebot_service') }}
                 </button>
               </td>
             </tr>
@@ -99,9 +106,9 @@
       <button type="button" class="doc-link-button" @click="addPackage()">
         + {{ $t('angebot_document.add_package') }}
       </button>
-      <select v-if="itemStore.items.length" class="doc-from-items" value="" @change="addFromArticle($event)">
+      <select v-if="oneTimeArticles.length" class="doc-from-items" value="" @change="addFromArticle($event)">
         <option value="">{{ $t('angebot_document.add_from_items') }}</option>
-        <option v-for="article in itemStore.items" :key="article.id" :value="article.id">
+        <option v-for="article in oneTimeArticles" :key="article.id" :value="article.id">
           {{ article.name }} · {{ formatDocMoney(article.price, currency) }}
         </option>
       </select>
@@ -121,6 +128,7 @@ import { useItemStore } from '@/scripts/admin/stores/item'
 import BlockFrame from './BlockFrame.vue'
 import AutoTextarea from './AutoTextarea.vue'
 import {
+  isMonthly,
   formatDocMoney,
   formatMoneyInput,
   packageDescription,
@@ -137,6 +145,15 @@ const itemStore = useItemStore()
 const items = computed(() => estimateStore.newEstimate.items)
 const currency = computed(() => estimateStore.newEstimate.selectedCurrency || null)
 const currencySymbol = computed(() => currency.value?.symbol || '€')
+
+// Monthly items (hosting, care, licences) go in the hosting block.
+const oneTimeArticles = computed(() =>
+  itemStore.items.filter((article) => !isMonthly(article.unit?.name))
+)
+
+function hasText(rows) {
+  return rows.some((row) => row.text.trim())
+}
 
 onMounted(() => {
   if (!itemStore.items.length || itemStore.items.length < itemStore.totalItems) {

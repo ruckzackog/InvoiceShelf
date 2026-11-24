@@ -372,3 +372,16 @@ test('every Baustein the default layout uses is created by the command', functio
     expect($names[1])->not->toBeEmpty()
         ->each->toBeIn(array_keys(SeedAngebotBausteine::bausteine()));
 });
+
+test('a package with only a feature list prints one column', function () {
+    $estimate = documentEstimate();
+    $estimate->items()->first()->update(['description' => "Website-Paket inkl. 1 Jahr:\n- Website Design\n- Kostenlose Domain"]);
+
+    $html = render($estimate->fresh(), doc(['type' => 'estimateItems']));
+
+    expect($html)
+        ->toContain('<td colspan="2">Website Design</td>')
+        ->toContain('<td colspan="2">Kostenlose Domain</td>')
+        ->toContain('<p>Website-Paket inkl. 1 Jahr:</p>')
+        ->not->toContain(__('pdf_angebot_description'));
+});

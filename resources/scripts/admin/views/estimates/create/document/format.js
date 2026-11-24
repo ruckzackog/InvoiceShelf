@@ -115,3 +115,11 @@ export function formatMoneyInput(cents) {
     maximumFractionDigits: 2,
   })
 }
+
+/**
+ * Items billed per month (hosting, care packages, licences) by their unit,
+ * e.g. "Monat(e)". They belong in the hosting block, not in the project cost.
+ */
+export function isMonthly(unitName) {
+  return /^(monat|month)/i.test(String(unitName || '').trim())
+}

@@ -1634,6 +1634,7 @@
   "pdf_angebot_contact": "Ihr Ansprechpartner",
   "pdf_angebot_activity": "Tätigkeit",
   "pdf_angebot_description": "Beschreibung",
+  "pdf_angebot_service": "Leistung",
   "pdf_angebot_sum": "Summe",
   "pdf_angebot_position": "Position",
   "pdf_angebot_amount": "Betrag",
@@ -1771,6 +1772,7 @@
     "price": "Preis netto",
     "add_package": "Arbeitspaket",
     "add_from_items": "Aus Artikeln übernehmen …",
-    "more_in_form": "Rabatt und Steuern im Formular"
+    "more_in_form": "Rabatt und Steuern im Formular",
+    "monthly_warning": "Monatlicher Preis: gehört zu „Hosting & Betreuung“, nicht in die Projektkosten."
   }
 }

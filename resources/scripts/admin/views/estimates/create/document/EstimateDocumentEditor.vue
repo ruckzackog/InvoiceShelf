@@ -561,6 +561,21 @@ function insertBaustein(note) {
 }
 /* Work packages edited in place */
 
+.doc-warning {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 2mm;
+  padding: 1.5mm 3mm;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+}
+
 .doc-package--editable {
   position: relative;
 }
@@ -586,6 +601,16 @@ function insertBaustein(note) {
 
 .doc-activity td {
   position: relative;
+}
+
+/* Empty description fields stay quiet until the row is hovered or focused. */
+.doc-activity textarea::placeholder {
+  color: transparent;
+}
+
+.doc-activity:hover textarea::placeholder,
+.doc-activity textarea:focus::placeholder {
+  color: #9ca3af;
 }
 
 .doc-activity-text {
