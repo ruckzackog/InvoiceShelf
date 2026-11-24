@@ -43,7 +43,9 @@ class EstimatesController extends Controller
             $estimate->send($request->title, $request->body);
         }
 
-        GenerateEstimatePdfJob::dispatch($estimate);
+        if (! $this->isAutosave($request)) {
+            GenerateEstimatePdfJob::dispatch($estimate);
+        }
 
         return new EstimateResource($estimate);
     }
@@ -61,9 +63,24 @@ class EstimatesController extends Controller
 
         $estimate = $estimate->updateEstimate($request);
 
-        GenerateEstimatePdfJob::dispatch($estimate, true);
+        if ($this->isAutosave($request)) {
+            // No PDF while typing: drop the stored one, so the PDF link renders
+            // the current state until the next regular save stores a new one.
+            $estimate->clearMediaCollection('estimate');
+        } else {
+            GenerateEstimatePdfJob::dispatch($estimate, true);
+        }
 
         return new EstimateResource($estimate);
+    }
+
+    /**
+     * The offer editor saves drafts while typing with the header X-Autosave: 1.
+     * A header, not a field: every request field is mass-assigned to the estimate.
+     */
+    protected function isAutosave(Request $request): bool
+    {
+        return $request->header('X-Autosave') === '1';
     }
 
     public function delete(DeleteEstimatesRequest $request)

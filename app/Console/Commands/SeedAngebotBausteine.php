@@ -74,34 +74,20 @@ class SeedAngebotBausteine extends Command
     }
 
     /**
-     * Name => HTML. Customer text rules: Sie, short sentences, no dash, no
-     * comma before "und", no invented numbers.
+     * Name => HTML. Customer text rules: short sentences, no dash, no comma
+     * before "und", no invented numbers. Formal "Sie" by default; the "(du)"
+     * versions exist because some customers are addressed with "du" (decision
+     * 0018) and are only used when an offer is set to "du".
      *
      * @return array<string, string>
      */
     public static function bausteine(): array
     {
         return [
+            // In every new document (resources/scripts/.../document/defaultDocument.js).
             'Einleitung' => '<p>Sehr geehrte Damen und Herren,</p>'
                 .'<p>vielen Dank für das Gespräch. Auf dieser Grundlage haben wir das folgende Angebot erstellt. '
                 .'Es beschreibt den Umfang, den Zeitplan und alle Kosten, auch die laufenden. Für Fragen sind wir jederzeit für Sie da.</p>',
-
-            'Projektbeschreibung und Ziel' => '<h2>Projektbeschreibung</h2>'
-                .'<p>Wir setzen die neue Website mit WordPress um. Sie ist auf Smartphone und Desktop gut bedienbar.</p>'
-                .'<h3>Projektziel</h3>'
-                .'<p>Die neue Website soll:</p>'
-                .'<ul><li><p>Ihr Angebot klar und modern zeigen</p></li><li><p>Anfragen erleichtern</p></li><li><p>in Suchmaschinen besser gefunden werden</p></li></ul>',
-
-            'Seitenstruktur und Funktionen' => '<h2>Seitenstruktur und Funktionen</h2>'
-                .'<h3>Seitenstruktur</h3>'
-                .'<ul><li><p>Startseite</p></li><li><p>Leistungen</p></li><li><p>Über uns</p></li><li><p>Kontakt</p></li><li><p>Impressum und Datenschutz</p></li></ul>'
-                .'<h3>Funktionen</h3>'
-                .'<ul><li><p>Kontaktformular mit Spamschutz ohne Tracking</p></li></ul>',
-
-            'Zeitplan Hinweis' => '<p>Der Zeitplan gilt ab Auftragserteilung. Er setzt voraus, dass Inhalte und Freigaben rechtzeitig vorliegen.</p>',
-
-            'Leistungen nach Aufwand' => '<p>Leistungen über den beschriebenen Umfang hinaus verrechnen wir nach Aufwand zum vereinbarten Stundensatz. '
-                .'Wir stimmen sie vorher schriftlich mit Ihnen ab.</p>',
 
             'Hosting & Betreuung' => '<h2>Hosting &amp; Betreuung</h2>'
                 .'<p>Nach dem Go-live betreuen wir Ihre Website im Hosting weiter. Dafür gibt es einen eigenen Vertrag.</p>'
@@ -117,31 +103,38 @@ class SeedAngebotBausteine extends Command
                 .'<li><p>Rechtliche Prüfung von Inhalten, Impressum und Datenschutzerklärung</p></li>'
                 .'<li><p>Pflege der Inhalte nach der Einschulung</p></li></ul>',
 
-            'Inhalte durch den Kunden' => '<h3>Inhalte</h3>'
-                .'<p>Sie erstellen die Texte und Bilder und stellen sie uns rechtzeitig zur Verfügung. '
-                .'Sie müssen den vereinbarten technischen Vorgaben entsprechen.</p>',
-
-            'Inhalte durch Ruckzack' => '<h3>Inhalte</h3>'
-                .'<p>Wir erstellen die Inhalte für Sie. Das umfasst Konzept, Umsetzung und Lieferung zum vereinbarten Termin.</p>',
-
             'Rahmenbedingungen' => '<h2>Rahmenbedingungen</h2>'
                 .'<h3>Mitwirkung</h3>'
-                .'<p>Sie stellen Inhalte, Zugänge und Freigaben rechtzeitig zur Verfügung. Verzögerungen dabei verschieben den Zeitplan.</p>'
+                .'<p>Sie stellen Inhalte, Zugänge und Freigaben rechtzeitig zur Verfügung. Texte und Bilder müssen den vereinbarten technischen Vorgaben entsprechen. '
+                .'Verzögerungen dabei verschieben den Zeitplan.</p>'
                 .'<h3>Änderungen</h3>'
                 .'<p>Änderungen am Umfang vereinbaren wir schriftlich, bevor wir sie umsetzen. '
                 .'Funktionen außerhalb des beschriebenen Umfangs verrechnen wir gesondert.</p>'
                 .'<h3>Datenschutz</h3>'
-                .'<p>Wir setzen Impressum, Datenschutzerklärung und Cookie-Hinweis technisch um. Die inhaltliche Verantwortung liegt bei Ihnen. '
+                .'<p>Wir setzen Impressum, Datenschutzerklärung und Cookie-Hinweis technisch um und halten bei der Umsetzung die Vorgaben der DSGVO ein. '
+                .'Die inhaltliche Verantwortung liegt bei Ihnen, das Angebot umfasst keine Rechtsberatung. '
                 .'Einen Vertrag zur Auftragsverarbeitung nach Art. 28 DSGVO schließen wir auf Wunsch ab.</p>'
                 .'<h3>Förderungen</h3>'
-                .'<p>Ob für Ihr Projekt eine Förderung in Frage kommt, prüfen wir gerne gemeinsam mit Ihnen. Eine Zusage können wir nicht geben.</p>',
+                .'<p>Ob für Ihr Projekt eine Förderung in Frage kommt, prüfen wir gerne gemeinsam mit Ihnen. Eine Zusage können wir nicht geben.</p>'
+                .'<h3>Allgemeines</h3>'
+                .'<p>Beide Seiten behandeln alle Projektdetails vertraulich. Die Haftung für leichte Fahrlässigkeit ist ausgeschlossen. Es gilt österreichisches Recht. '
+                .'Dieses Angebot ist vier Wochen gültig. Es gelten unsere AGB, abrufbar unter ruckzack.at.</p>',
 
-            'DSGVO und Datenschutzmaßnahmen' => '<h3>Datenschutz in der Umsetzung</h3>'
-                .'<p>Wir halten bei der Umsetzung die Vorgaben der DSGVO ein. Dazu gehören:</p>'
-                .'<ul><li><p><strong>Verschlüsselung:</strong> Personenbezogene Daten werden bei Übertragung und Speicherung verschlüsselt.</p></li>'
-                .'<li><p><strong>Speicherdauer:</strong> Daten aus Server-Logs und Formularen speichern wir nur so lange wie nötig. Danach werden sie automatisch gelöscht.</p></li>'
-                .'<li><p><strong>Rechtliche Inhalte:</strong> Impressum, Datenschutzhinweis und Cookie-Hinweis gestalten Sie inhaltlich. Wir setzen sie technisch um.</p></li></ul>'
-                .'<p>Das Angebot umfasst keine Rechtsberatung.</p>',
+            'Annahme' => '<h2>Annahme</h2>'
+                .'<p>Bitte bestätigen Sie das Angebot mit Ihrer Unterschrift oder per E-Mail an office@ruckzack.at unter Angabe der Angebotsnummer. '
+                .'Wir freuen uns auf die Zusammenarbeit.</p>'
+                .'<p>Mit freundlichen Grüßen</p>',
+
+            // Inserted when needed.
+            'Projektbeschreibung' => '<h2>Projektbeschreibung</h2>'
+                .'<p>Wir setzen die neue Website mit WordPress um. Die Seite ist auf Smartphone und Desktop gut bedienbar.</p>'
+                .'<h3>Projektziel</h3>'
+                .'<p>Die neue Website soll:</p>'
+                .'<ul><li><p>Ihr Angebot klar und modern zeigen</p></li><li><p>Anfragen erleichtern</p></li><li><p>in Suchmaschinen besser gefunden werden</p></li></ul>'
+                .'<h3>Seitenstruktur</h3>'
+                .'<ul><li><p>Startseite</p></li><li><p>Leistungen</p></li><li><p>Über uns</p></li><li><p>Kontakt</p></li><li><p>Impressum und Datenschutz</p></li></ul>'
+                .'<h3>Funktionen</h3>'
+                .'<ul><li><p>Kontaktformular mit Spamschutz ohne Tracking</p></li></ul>',
 
             'Zahlung nach Projektabschluss' => '<h3>Zahlung</h3>'
                 .'<p>Der vereinbarte Betrag ist innerhalb von 30 Tagen nach Übergabe und Abnahme des Projekts fällig.</p>',
@@ -150,18 +143,51 @@ class SeedAngebotBausteine extends Command
                 .'<p>50 % des Gesamtbetrags sind als Anzahlung vor Projektbeginn fällig. Die restlichen 50 % sind nach der Abnahme fällig.</p>',
 
             'Zahlung nach Meilensteinen' => '<h3>Zahlung</h3>'
-                .'<p>Wir verrechnen in drei Teilen: 30 % bei Projektstart, 30 % nach Freigabe des Designs und 40 % nach der Abnahme.</p>',
+                .'<p>Wir verrechnen in drei Teilen: 30 % bei Auftragserteilung, 40 % nach Freigabe des Designs und 30 % nach dem Go-live.</p>',
 
-            'Schlussbestimmungen' => '<h3>Schlussbestimmungen</h3>'
-                .'<ul><li><p><strong>Vertraulichkeit:</strong> Beide Seiten behandeln alle Projektdetails vertraulich.</p></li>'
-                .'<li><p><strong>Haftung:</strong> Die Haftung für leichte Fahrlässigkeit ist ausgeschlossen.</p></li>'
-                .'<li><p><strong>Recht:</strong> Es gilt österreichisches Recht.</p></li></ul>'
-                .'<p>Dieses Angebot ist vier Wochen gültig. Es gelten unsere AGB, abrufbar unter ruckzack.at.</p>',
+            // "du" versions (plural, for teams and associations), picked by the editor
+            // when the offer is set to "du". Texts without a form of address have none.
+            'Einleitung (du)' => '<p>Liebe …,</p>'
+                .'<p>vielen Dank für das Gespräch. Auf dieser Grundlage haben wir das folgende Angebot erstellt. '
+                .'Es beschreibt den Umfang, den Zeitplan und alle Kosten, auch die laufenden. Für Fragen sind wir jederzeit für euch da.</p>',
 
-            'Annahme' => '<h2>Annahme</h2>'
-                .'<p>Bitte bestätigen Sie das Angebot mit Ihrer Unterschrift oder per E-Mail an office@ruckzack.at unter Angabe der Angebotsnummer. '
+            'Hosting & Betreuung (du)' => '<h2>Hosting &amp; Betreuung</h2>'
+                .'<p>Nach dem Go-live betreuen wir eure Website im Hosting weiter. Dafür gibt es einen eigenen Vertrag.</p>'
+                .'<p>In allen Paketen sind unbegrenzter Traffic, mehrmals tägliche Backups auf einem getrennten System und Sicherheitsupdates enthalten. '
+                .'Das Hosting läuft in Europa bei Hetzner in Deutschland. Der Vertrag ist unbefristet und hat drei Monate Mindestlaufzeit. '
+                .'Danach ist er mit einem Monat zum Monatsende kündbar. Ein Paketwechsel ist jederzeit möglich. Website und Daten gehören euch.</p>',
+
+            'Rahmenbedingungen (du)' => '<h2>Rahmenbedingungen</h2>'
+                .'<h3>Mitwirkung</h3>'
+                .'<p>Ihr stellt Inhalte, Zugänge und Freigaben rechtzeitig zur Verfügung. Texte und Bilder müssen den vereinbarten technischen Vorgaben entsprechen. '
+                .'Verzögerungen dabei verschieben den Zeitplan.</p>'
+                .'<h3>Änderungen</h3>'
+                .'<p>Änderungen am Umfang vereinbaren wir schriftlich, bevor wir sie umsetzen. '
+                .'Funktionen außerhalb des beschriebenen Umfangs verrechnen wir gesondert.</p>'
+                .'<h3>Datenschutz</h3>'
+                .'<p>Wir setzen Impressum, Datenschutzerklärung und Cookie-Hinweis technisch um und halten bei der Umsetzung die Vorgaben der DSGVO ein. '
+                .'Die inhaltliche Verantwortung liegt bei euch, das Angebot umfasst keine Rechtsberatung. '
+                .'Einen Vertrag zur Auftragsverarbeitung nach Art. 28 DSGVO schließen wir auf Wunsch ab.</p>'
+                .'<h3>Förderungen</h3>'
+                .'<p>Ob für euer Projekt eine Förderung in Frage kommt, prüfen wir gerne gemeinsam mit euch. Eine Zusage können wir nicht geben.</p>'
+                .'<h3>Allgemeines</h3>'
+                .'<p>Beide Seiten behandeln alle Projektdetails vertraulich. Die Haftung für leichte Fahrlässigkeit ist ausgeschlossen. Es gilt österreichisches Recht. '
+                .'Dieses Angebot ist vier Wochen gültig. Es gelten unsere AGB, abrufbar unter ruckzack.at.</p>',
+
+            'Annahme (du)' => '<h2>Annahme</h2>'
+                .'<p>Bitte bestätigt das Angebot mit eurer Unterschrift oder per E-Mail an office@ruckzack.at unter Angabe der Angebotsnummer. '
                 .'Wir freuen uns auf die Zusammenarbeit.</p>'
-                .'<p>Mit freundlichen Grüßen</p>',
+                .'<p>Liebe Grüße</p>',
+
+            'Projektbeschreibung (du)' => '<h2>Projektbeschreibung</h2>'
+                .'<p>Wir setzen die neue Website mit WordPress um. Die Seite ist auf Smartphone und Desktop gut bedienbar.</p>'
+                .'<h3>Projektziel</h3>'
+                .'<p>Die neue Website soll:</p>'
+                .'<ul><li><p>euer Angebot klar und modern zeigen</p></li><li><p>Anfragen erleichtern</p></li><li><p>in Suchmaschinen besser gefunden werden</p></li></ul>'
+                .'<h3>Seitenstruktur</h3>'
+                .'<ul><li><p>Startseite</p></li><li><p>Leistungen</p></li><li><p>Über uns</p></li><li><p>Kontakt</p></li><li><p>Impressum und Datenschutz</p></li></ul>'
+                .'<h3>Funktionen</h3>'
+                .'<ul><li><p>Kontaktformular mit Spamschutz ohne Tracking</p></li></ul>',
         ];
     }
 }

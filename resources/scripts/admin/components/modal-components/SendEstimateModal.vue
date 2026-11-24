@@ -249,6 +249,11 @@ async function setInitialData() {
 
   if (modalData.value) {
     estimateMailForm.to = modalData.value.customer.email
+    // A subject with number and sender instead of a generic "New ...".
+    estimateMailForm.subject = t('angebot_document.mail_subject.estimate', {
+      number: modalData.value.estimate_number,
+      company: companyStore.selectedCompany?.name || '',
+    })
   }
 
   estimateMailForm.body =

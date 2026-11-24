@@ -84,7 +84,9 @@ trait GeneratesPdfTrait
         \Storage::disk('local')->put('temp/'.$collection_name.'/'.$this->id.'/temp.pdf', $pdf->output());
 
         if ($deleteExistingFile) {
-            $this->clearMediaCollection($this->id);
+            // The collection name, not the model id: otherwise old PDFs stay
+            // and getGeneratedPDF() keeps serving the first one.
+            $this->clearMediaCollection($collection_name);
         }
 
         $file_disk = FileDisk::whereSetAsDefault(true)->first();

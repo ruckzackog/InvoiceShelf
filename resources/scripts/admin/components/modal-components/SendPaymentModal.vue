@@ -262,6 +262,11 @@ async function setInitialData() {
 
   if (modalData.value) {
     paymentMailForm.to = modalData.value.customer.email
+    // A subject with number and sender instead of a generic "New ...".
+    paymentMailForm.subject = t('angebot_document.mail_subject.payment', {
+      number: modalData.value.payment_number,
+      company: companyStore.selectedCompany?.name || '',
+    })
   }
 
   paymentMailForm.body = companyStore.selectedCompanySettings.payment_mail_body

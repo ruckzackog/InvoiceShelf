@@ -48,14 +48,26 @@ export function descriptionLines(description) {
     .filter((line) => line !== '')
 }
 
+/**
+ * Mirrors DocumentRenderer::workPackage(): rows start with "- " when the
+ * description was written by the editor; older ones split on the first colon.
+ */
 export function workPackage(description) {
+  const raw = String(description || '').split(/\r\n|\r|\n/)
+  const rowPattern = /^\s*[-•*]\s+/u
+  const marked = raw.some((line) => rowPattern.test(line))
   const intro = []
   const rows = []
 
-  for (const line of descriptionLines(description)) {
-    const index = line.indexOf(':')
+  for (const original of raw) {
+    const isRow = rowPattern.test(original)
+    const line = original.replace(/^\s*[-•*]\s*/u, '').trim()
+    if (line === '') continue
 
-    if (index === -1 && rows.length === 0) {
+    const index = line.indexOf(':')
+    const isIntro = marked ? !isRow : index === -1 && rows.length === 0
+
+    if (isIntro) {
       intro.push(line)
       continue
     }
@@ -68,4 +80,51 @@ export function workPackage(description) {
   }
 
   return { intro, rows }
+}
+
+/**
+ * Inverse of workPackage(): intro lines, then one "- Tätigkeit: Beschreibung"
+ * line per row. Colons in a title would split it, so they are dropped there.
+ */
+export function packageDescription({ intro, rows }) {
+  const introLines = intro.map((line) => line.trim()).filter(Boolean)
+  const rowLines = rows
+    .filter((row) => row.title.trim() || row.text.trim())
+    .map((row) => {
+      const title = row.title.replace(/:/g, '').trim()
+      return row.text.trim() ? `- ${title}: ${row.text.trim()}` : `- ${title}`
+    })
+
+  return [...introLines, ...rowLines].join('\n')
+}
+
+export function parseMoneyInput(value) {
+  const cleaned = String(value).replace(/[^0-9,.-]/g, '')
+  // German input: "1.200,50" or "1200,5"; also accept "1200.50".
+  const normalized = cleaned.includes(',')
+    ? cleaned.replace(/\./g, '').replace(',', '.')
+    : cleaned
+  const amount = Number.parseFloat(normalized)
+
+  return Number.isFinite(amount) ? Math.round(amount * 100) : 0
+}
+
+export function formatMoneyInput(cents) {
+  return ((Number(cents) || 0) / 100).toLocaleString('de-DE', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+}
+
+/**
+ * Items billed per month (hosting, care packages, licences) by their unit,
+ * e.g. "Monat(e)". They belong in the hosting block, not in the project cost.
+ */
+export function isMonthly(unitName) {
+  return /^(monat|month)/i.test(String(unitName || '').trim())
+}
+
+/** Items renamed to "Alt: …" by the text catalog are retired: never offered again. */
+export function isArchived(item) {
+  return /^alt:\s/i.test(String(item?.name || ''))
 }

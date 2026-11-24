@@ -7,7 +7,7 @@
     </template>
 
     <div v-if="editing" class="doc-block-panel">
-      <label v-for="item in itemStore.items" :key="item.id" class="doc-block-option">
+      <label v-for="item in choices" :key="item.id" class="doc-block-option">
         <input type="checkbox" :checked="selectedIds.includes(item.id)" @change="toggle(item.id)" />
         {{ item.name }} · {{ formatDocMoney(item.price, currency) }}
       </label>
@@ -29,7 +29,14 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="pkg in packages" :key="pkg.id" :class="{ 'doc-recommended': pkg.id === node.attrs.recommendedId }">
+        <tr
+          v-for="pkg in packages"
+          :key="pkg.id"
+          class="doc-hosting-row"
+          :class="{ 'doc-recommended': pkg.id === node.attrs.recommendedId }"
+          :title="$t(pkg.id === node.attrs.recommendedId ? 'angebot_document.hosting_unrecommend' : 'angebot_document.hosting_make_recommended')"
+          @click="toggleRecommended(pkg.id)"
+        >
           <td>
             <strong>{{ pkg.name }}</strong>
             <span v-if="pkg.id === node.attrs.recommendedId" class="doc-badge">{{ $t('pdf_angebot_recommended') }}</span>
@@ -49,7 +56,7 @@ import { nodeViewProps } from '@tiptap/vue-3'
 import { useItemStore } from '@/scripts/admin/stores/item'
 import { useEstimateStore } from '@/scripts/admin/stores/estimate'
 import BlockFrame from './BlockFrame.vue'
-import { descriptionLines, formatDocMoney } from '../format'
+import { descriptionLines, formatDocMoney, isArchived, isMonthly } from '../format'
 
 const props = defineProps(nodeViewProps)
 
@@ -57,6 +64,14 @@ const itemStore = useItemStore()
 const estimateStore = useEstimateStore()
 const currency = computed(() => estimateStore.newEstimate.selectedCurrency || null)
 const editing = ref(false)
+
+// Hosting and care are billed per month: offer those items, or all when the
+// company has none with a monthly unit.
+const choices = computed(() => {
+  const active = itemStore.items.filter((item) => !isArchived(item))
+  const monthly = active.filter((item) => isMonthly(item.unit?.name))
+  return monthly.length ? monthly : active
+})
 
 const selectedIds = computed(() => (props.node.attrs.itemIds || []).map(Number))
 
@@ -83,6 +98,11 @@ function toggle(id) {
     itemIds: ids,
     recommendedId: ids.includes(props.node.attrs.recommendedId) ? props.node.attrs.recommendedId : null,
   })
+}
+
+// A click on a package row makes it the recommendation, a second click removes it.
+function toggleRecommended(id) {
+  props.updateAttributes({ recommendedId: props.node.attrs.recommendedId === id ? null : id })
 }
 
 function setRecommended(value) {

@@ -3,6 +3,7 @@ import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import TextAlign from '@tiptap/extension-text-align'
 import { TableKit } from '@tiptap/extension-table'
+import { Placeholder } from '@tiptap/extensions'
 import OfferMetaView from './nodes/OfferMetaView.vue'
 import ItemsView from './nodes/ItemsView.vue'
 import TotalsView from './nodes/TotalsView.vue'
@@ -67,6 +68,8 @@ export const OfferMeta = boundBlock('offerMeta', OfferMetaView, {
   contactName: '',
   contactEmail: '',
   contactPhone: '',
+  // "sie" or "du": which version of a Baustein gets inserted.
+  address: 'sie',
 })
 export const EstimateItems = boundBlock('estimateItems', ItemsView)
 export const EstimateTotals = boundBlock('estimateTotals', TotalsView)
@@ -75,6 +78,9 @@ export const HostingPackages = boundBlock('hostingPackages', HostingView, {
   recommendedId: null,
 })
 export const Signature = boundBlock('signature', SignatureView)
+// A reference to a Baustein written by the ops agent. The editor replaces it
+// with the Baustein's text right after loading (EstimateDocumentEditor).
+export const BausteinRef = boundBlock('baustein', PageBreakView, { name: '', address: 'sie' })
 export const PageBreak = boundBlock('pageBreak', PageBreakView)
 
 export const Field = Node.create({
@@ -107,14 +113,9 @@ export const Field = Node.create({
   },
 })
 
-export const FIELD_KEYS = [
-  'PRIMARY_CONTACT_NAME',
-  'CONTACT_DISPLAY_NAME',
-  'ESTIMATE_NUMBER',
-  'ESTIMATE_DATE',
-  'ESTIMATE_EXPIRY_DATE',
-  'COMPANY_NAME',
-]
+// Offered in the insert menu. Number and dates are in the offer details block;
+// documents that already use other keys keep working (FieldView, renderer).
+export const FIELD_KEYS = ['PRIMARY_CONTACT_NAME', 'CONTACT_DISPLAY_NAME']
 
 export const BLOCK_TYPES = [
   'offerMeta',
@@ -125,8 +126,13 @@ export const BLOCK_TYPES = [
   'pageBreak',
 ]
 
-export function documentExtensions({ onEditPositions }) {
+export function documentExtensions({ onEditPositions, titlePlaceholder = '' }) {
   return [
+    Placeholder.configure({
+      // Only the title gets a hint; empty paragraphs stay clean.
+      placeholder: ({ node }) => (node.type.name === 'heading' && node.attrs.level === 1 ? titlePlaceholder : ''),
+      showOnlyCurrent: false,
+    }),
     StarterKit.configure({
       // The PDF renderer has no code nodes: keep them out so nothing is lost.
       code: false,
@@ -145,6 +151,7 @@ export function documentExtensions({ onEditPositions }) {
     HostingPackages,
     Signature,
     PageBreak,
+    BausteinRef,
     Field,
   ]
 }

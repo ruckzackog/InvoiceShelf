@@ -2,7 +2,7 @@
   <BlockFrame type="estimateTotals" :selected="selected" :delete-node="deleteNode">
     <template #actions>
       <button type="button" class="doc-block-button doc-block-button--primary" @click="extension.options.onEditPositions()">
-        {{ $t('angebot_document.edit_positions') }}
+        {{ $t('angebot_document.more_in_form') }}
       </button>
     </template>
 

@@ -5,7 +5,9 @@ namespace App\Services\EstimateDocument;
 use App\Models\Currency;
 use App\Models\Estimate;
 use App\Models\Item;
+use App\Models\Note;
 use App\Models\Tax;
+use App\Support\PdfHtmlSanitizer;
 use Illuminate\Support\Collection;
 
 /**
@@ -112,6 +114,7 @@ class DocumentRenderer
             'tableHeader' => '<th'.$this->span($attrs).'>'.$inner().'</th>',
             'tableCell' => '<td'.$this->span($attrs).'>'.$inner().'</td>',
             'signature' => $this->view('signature'),
+            'baustein' => $this->baustein($attrs),
             'field' => $this->field($attrs),
             'offerMeta' => $this->offerMeta($attrs),
             'estimateItems' => $this->view('items'),
@@ -226,6 +229,35 @@ class DocumentRenderer
         }
 
         return $this->fields;
+    }
+
+    /**
+     * A reference to a Baustein (written by the ops agent). Rendered from the
+     * current note; the editor turns it into normal text when the offer is
+     * opened, so later changes of the Baustein do not reach a sent offer.
+     * Uses the "<name> (du)" version when the offer is set to du.
+     *
+     * @param  array<mixed>  $attrs
+     */
+    protected function baustein(array $attrs): string
+    {
+        $name = $attrs['name'] ?? null;
+
+        if (! is_string($name) || $name === '') {
+            return '';
+        }
+
+        $du = ($attrs['address'] ?? 'sie') === 'du';
+        $notes = Note::query()
+            ->where('company_id', $this->estimate->company_id)
+            ->where('type', 'EstimateBlock')
+            ->whereIn('name', [$name, $name.' (du)'])
+            ->get()
+            ->keyBy('name');
+
+        $note = ($du ? $notes->get($name.' (du)') : null) ?? $notes->get($name);
+
+        return $note ? '<div class="doc-baustein">'.PdfHtmlSanitizer::sanitize((string) $note->notes).'</div>' : '';
     }
 
     /**
@@ -359,21 +391,33 @@ class DocumentRenderer
     }
 
     /**
-     * Splits the description of a work package. Lines before the first
-     * "Tätigkeit: Beschreibung" line are the intro, every line after that is a
-     * row of the activity table (a row without a colon has no description).
+     * Splits the description of a work package into intro and activity rows.
+     *
+     * Written by the editor: activity rows start with "- " ("- Tätigkeit:
+     * Beschreibung"), every other line is intro, so an intro line may contain
+     * a colon. Older descriptions without "- ": lines before the first line
+     * with a colon are the intro, the rest are rows.
      *
      * @return array{intro: list<string>, rows: list<array{title: string, text: string}>}
      */
     public static function workPackage(?string $description): array
     {
+        $raw = preg_split('/\r\n|\r|\n/', (string) $description) ?: [];
+        $marked = (bool) preg_grep('/^\s*[-•*]\s+/u', $raw);
         $intro = [];
         $rows = [];
 
-        foreach (self::descriptionLines($description) as $line) {
+        foreach ($raw as $line) {
+            $isRow = (bool) preg_match('/^\s*[-•*]\s+/u', $line);
+            $line = trim(preg_replace('/^\s*[-•*]\s*/u', '', $line));
+
+            if ($line === '') {
+                continue;
+            }
+
             $parts = explode(':', $line, 2);
 
-            if (count($parts) === 1 && $rows === []) {
+            if ($marked ? ! $isRow : (count($parts) === 1 && $rows === [])) {
                 $intro[] = $line;
 
                 continue;

@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\SeedAngebotBausteine;
+use App\Jobs\GenerateEstimatePdfJob;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Estimate;
@@ -14,6 +15,7 @@ use App\Services\EstimateDocument\DocumentRenderer;
 use App\Services\PDFDrivers\GotenbergPDFDriver;
 use App\Services\PDFService;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Bus;
 use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\getJson;
@@ -255,7 +257,17 @@ test('hosting packages use the current item prices of the company only', functio
 });
 
 test('work package descriptions split into intro and activities', function () {
-    expect(DocumentRenderer::workPackage("Einleitung\n- Kick-off: Ziele klären\nSeitenstruktur"))->toBe([
+    // Written by the editor: rows start with "- ", so an intro line may contain a colon.
+    expect(DocumentRenderer::workPackage("Die Website soll: schnell sein\n- Kick-off: Ziele klären\n- Seitenstruktur"))->toBe([
+        'intro' => ['Die Website soll: schnell sein'],
+        'rows' => [
+            ['title' => 'Kick-off', 'text' => 'Ziele klären'],
+            ['title' => 'Seitenstruktur', 'text' => ''],
+        ],
+    ]);
+
+    // Older descriptions without "- ": split on the first line with a colon.
+    expect(DocumentRenderer::workPackage("Einleitung\nKick-off: Ziele klären\nSeitenstruktur"))->toBe([
         'intro' => ['Einleitung'],
         'rows' => [
             ['title' => 'Kick-off', 'text' => 'Ziele klären'],
@@ -352,4 +364,88 @@ test('Bausteine follow the customer text rules', function () {
             ->not->toMatch('/, und /', $name)
             ->not->toMatch('/\b(ganzheitlich|maßgeschneidert|innovativ)/iu', $name);
     }
+});
+
+test('every Baustein the default layout uses is created by the command', function () {
+    $js = file_get_contents(resource_path('scripts/admin/views/estimates/create/document/defaultDocument.js'));
+    preg_match('/DEFAULT_BAUSTEINE = \[(.*?)\]/s', $js, $match);
+    preg_match_all("/'([^']+)'/", $match[1] ?? '', $names);
+
+    expect($names[1])->not->toBeEmpty()
+        ->each->toBeIn(array_keys(SeedAngebotBausteine::bausteine()));
+});
+
+test('du versions belong to a Baustein and use no formal address', function () {
+    $bausteine = SeedAngebotBausteine::bausteine();
+
+    foreach ($bausteine as $name => $html) {
+        if (! str_ends_with($name, ' (du)')) {
+            continue;
+        }
+
+        expect(array_key_exists(substr($name, 0, -5), $bausteine))->toBeTrue($name)
+            ->and(strip_tags($html))->not->toMatch('/\b(Sie|Ihnen|Ihre[rmns]?)\b/u', $name);
+    }
+});
+
+test('a package with only a feature list prints one column', function () {
+    $estimate = documentEstimate();
+    $estimate->items()->first()->update(['description' => "Website-Paket inkl. 1 Jahr:\n- Website Design\n- Kostenlose Domain"]);
+
+    $html = render($estimate->fresh(), doc(['type' => 'estimateItems']));
+
+    expect($html)
+        ->toContain('<td colspan="2">Website Design</td>')
+        ->toContain('<td colspan="2">Kostenlose Domain</td>')
+        ->toContain('<p>Website-Paket inkl. 1 Jahr:</p>')
+        ->not->toContain(__('pdf_angebot_description'));
+});
+
+test('autosave saves without rendering a PDF, a regular save renders one', function () {
+    Bus::fake([GenerateEstimatePdfJob::class]);
+    $estimate = documentEstimate();
+
+    $payload = Estimate::factory()->raw([
+        'estimate_number' => $estimate->estimate_number,
+        'customer_id' => $estimate->customer_id,
+        'template_name' => 'angebot-dokument',
+        'items' => [EstimateItem::factory()->raw()],
+        'taxes' => [Tax::factory()->raw()],
+        'document' => doc(paragraph('Entwurf')),
+    ]);
+
+    putJson("api/v1/estimates/{$estimate->id}", $payload, ['X-Autosave' => '1'])->assertOk();
+    Bus::assertNotDispatched(GenerateEstimatePdfJob::class);
+    expect($estimate->fresh()->document)->toBe(doc(paragraph('Entwurf')));
+
+    putJson("api/v1/estimates/{$estimate->id}", $payload)->assertOk();
+    Bus::assertDispatched(GenerateEstimatePdfJob::class);
+});
+
+test('autosave can create a draft without rendering a PDF', function () {
+    Bus::fake([GenerateEstimatePdfJob::class]);
+
+    $payload = Estimate::factory()->raw([
+        'estimate_number' => 'EST-AUTO-1',
+        'template_name' => 'angebot-dokument',
+        'items' => [EstimateItem::factory()->raw()],
+        'taxes' => [Tax::factory()->raw()],
+    ]);
+
+    postJson('api/v1/estimates', $payload, ['X-Autosave' => '1'])->assertStatus(201);
+    Bus::assertNotDispatched(GenerateEstimatePdfJob::class);
+});
+
+test('a Baustein reference renders the current note, du version first', function () {
+    $estimate = documentEstimate();
+    Note::query()->create(['company_id' => $estimate->company_id, 'type' => 'EstimateBlock', 'name' => 'Annahme', 'notes' => '<h2>Annahme</h2><p>Bitte bestätigen Sie.</p><script>x</script>']);
+    Note::query()->create(['company_id' => $estimate->company_id, 'type' => 'EstimateBlock', 'name' => 'Annahme (du)', 'notes' => '<p>Bitte bestätigt.</p>']);
+
+    $sie = render($estimate, doc(['type' => 'baustein', 'attrs' => ['name' => 'Annahme']]));
+    $du = render($estimate, doc(['type' => 'baustein', 'attrs' => ['name' => 'Annahme', 'address' => 'du']]));
+    $missing = render($estimate, doc(['type' => 'baustein', 'attrs' => ['name' => 'Gibt es nicht', 'address' => 'du']]));
+
+    expect($sie)->toContain('Bitte bestätigen Sie.')->not->toContain('<script')
+        ->and($du)->toContain('Bitte bestätigt.')
+        ->and($missing)->toBe('');
 });

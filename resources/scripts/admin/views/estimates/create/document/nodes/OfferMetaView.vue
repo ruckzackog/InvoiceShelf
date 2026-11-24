@@ -21,7 +21,7 @@
             class="doc-inline-input"
             :value="node.attrs[key]"
             :placeholder="$t(`angebot_document.${placeholders[key]}`)"
-            @input="updateAttributes({ [key]: $event.target.value })"
+            @input="setContact(key, $event.target.value)"
           />
         </div>
       </div>
@@ -35,8 +35,14 @@ import { nodeViewProps } from '@tiptap/vue-3'
 import { useEstimateStore } from '@/scripts/admin/stores/estimate'
 import BlockFrame from './BlockFrame.vue'
 import { formatDocDate } from '../format'
+import { rememberContact } from '../defaultDocument'
 
-defineProps(nodeViewProps)
+const props = defineProps(nodeViewProps)
+
+function setContact(key, value) {
+  props.updateAttributes({ [key]: value })
+  rememberContact({ ...props.node.attrs, [key]: value })
+}
 
 const estimateStore = useEstimateStore()
 const estimate = computed(() => estimateStore.newEstimate)

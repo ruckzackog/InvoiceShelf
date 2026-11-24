@@ -266,6 +266,11 @@ async function setInitialData() {
 
   if (modalData.value) {
     invoiceMailForm.to = modalData.value.customer.email
+    // A subject with number and sender instead of a generic "New ...".
+    invoiceMailForm.subject = t('angebot_document.mail_subject.invoice', {
+      number: modalData.value.invoice_number,
+      company: companyStore.selectedCompany?.name || '',
+    })
   }
 
   invoiceMailForm.body = companyStore.selectedCompanySettings.invoice_mail_body
