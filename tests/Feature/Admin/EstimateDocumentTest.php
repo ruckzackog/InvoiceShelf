@@ -1,10 +1,12 @@
 <?php
 
+use App\Console\Commands\SeedAngebotBausteine;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Estimate;
 use App\Models\EstimateItem;
 use App\Models\Item;
+use App\Models\Note;
 use App\Models\Tax;
 use App\Models\User;
 use App\Rules\EstimateDocument;
@@ -319,4 +321,35 @@ test('an estimate without a document still renders the template', function () {
     $html = $estimate->getPDFData()->render();
 
     expect($html)->toContain('angebot-doc')->toContain('Design')->toContain('Alte Notiz');
+});
+
+test('the Bausteine command is a dry run by default and never overwrites', function () {
+    $count = fn () => Note::query()->where('company_id', $this->companyId)->where('type', 'EstimateBlock')->count();
+
+    $this->artisan('angebot:bausteine', ['--company' => $this->companyId])->assertSuccessful();
+    expect($count())->toBe(0);
+
+    Note::query()->create([
+        'company_id' => $this->companyId,
+        'type' => 'EstimateBlock',
+        'name' => 'Annahme',
+        'notes' => '<p>Eigene Fassung</p>',
+    ]);
+
+    $this->artisan('angebot:bausteine', ['--company' => $this->companyId, '--apply' => true])->assertSuccessful();
+    $this->artisan('angebot:bausteine', ['--company' => $this->companyId, '--apply' => true])->assertSuccessful();
+
+    expect($count())->toBe(count(SeedAngebotBausteine::bausteine()))
+        ->and(Note::query()->where('company_id', $this->companyId)->where('name', 'Annahme')->value('notes'))->toBe('<p>Eigene Fassung</p>');
+});
+
+test('Bausteine follow the customer text rules', function () {
+    foreach (SeedAngebotBausteine::bausteine() as $name => $html) {
+        $text = strip_tags($html);
+
+        expect($text)->not->toContain('–', $name)
+            ->not->toContain('—', $name)
+            ->not->toMatch('/, und /', $name)
+            ->not->toMatch('/\b(ganzheitlich|maßgeschneidert|innovativ)/iu', $name);
+    }
 });
