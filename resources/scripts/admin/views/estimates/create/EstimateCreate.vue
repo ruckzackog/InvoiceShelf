@@ -735,8 +735,12 @@ async function submitForm(options = {}) {
   background: transparent;
 }
 
+/* The popup root caps its height at 173px (max-h-[173px]); in the narrow panel a long
+   name and address wrap and spill over the next card. Only the root, not the
+   scrolling customer list inside. */
 .doc-card--customer > div {
   width: 100%;
+  max-height: none;
 }
 
 /* The customer card of InvoiceShelf is built for a wide column: stack it. */
