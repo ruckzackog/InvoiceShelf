@@ -7,6 +7,7 @@ use App\Support\GotenbergHostPolicy;
 use Gotenberg\Gotenberg;
 use Gotenberg\Stream;
 use Illuminate\Http\Response;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 class GotenbergPDFResponse
@@ -37,7 +38,20 @@ class GotenbergPDFResponse
 
 class GotenbergPDFDriver
 {
-    public function loadView(string $viewname): GotenbergPDFResponse
+    /**
+     * @param  array{footer?: string, margins?: array{0: string, 1: string, 2: string, 3: string}}  $options
+     */
+    public function loadView(string $viewname, array $options = []): GotenbergPDFResponse
+    {
+        return new GotenbergPDFResponse(Gotenberg::send($this->buildRequest($viewname, $options)));
+    }
+
+    /**
+     * The multipart request for Gotenberg, without sending it.
+     *
+     * @param  array{footer?: string, margins?: array{0: string, 1: string, 2: string, 3: string}}  $options
+     */
+    public function buildRequest(string $viewname, array $options = []): RequestInterface
     {
         $papersize = explode(' ', config('pdf.connections.gotenberg.papersize'));
         if (count($papersize) != 2) {
@@ -57,18 +71,24 @@ class GotenbergPDFDriver
             throw new \RuntimeException('Refusing to render PDF: unsafe Gotenberg host.');
         }
 
+        // Margins default to 0 so templates can set them in CSS. A template with
+        // a footer needs real margins: Chromium draws the footer inside them.
+        $margins = $options['margins'] ?? [0, 0, 0, 0];
+
         $request = Gotenberg::chromium($host)
             ->pdf()
-            ->margins(0, 0, 0, 0) // Margins can be set using CSS
-            ->paperSize($papersize[0], $papersize[1])
-            ->html(
-                Stream::string(
-                    'document.html',
-                    view($viewname)->render(),
-                )
-            );
-        $result = Gotenberg::send($request);
+            ->margins(...$margins)
+            ->paperSize($papersize[0], $papersize[1]);
 
-        return new GotenbergPDFResponse($result);
+        if (isset($options['footer'])) {
+            $request->footer(Stream::string('footer.html', view($options['footer'])->render()));
+        }
+
+        return $request->html(
+            Stream::string(
+                'document.html',
+                view($viewname)->render(),
+            )
+        );
     }
 }

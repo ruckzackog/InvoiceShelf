@@ -39,8 +39,8 @@ class BulkPayInvoicesController extends Controller
 
         foreach ($invoices as $invoice) {
             // Generate serial numbers first
-            $serial = (new SerialNumberFormatter())
-                ->setModel(new Payment())
+            $serial = (new SerialNumberFormatter)
+                ->setModel(new Payment)
                 ->setCompany($company_id)
                 ->setCustomer($invoice->customer_id)
                 ->setNextNumbers();
@@ -63,7 +63,7 @@ class BulkPayInvoicesController extends Controller
 
             // Create the payment
             $payment = Payment::create($paymentData);
-            
+
             // Generate unique hash and update sequence numbers
             $payment->unique_hash = PublicToken::make();
             $payment->sequence_number = $serial->nextSequenceNumber;
@@ -88,4 +88,3 @@ class BulkPayInvoicesController extends Controller
         ]);
     }
 }
-

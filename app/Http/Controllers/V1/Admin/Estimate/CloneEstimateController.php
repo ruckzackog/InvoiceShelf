@@ -70,6 +70,7 @@ class CloneEstimateController extends Controller
             'discount_per_item' => $estimate->discount_per_item,
             'tax' => $estimate->tax,
             'notes' => $estimate->notes,
+            'document' => $estimate->document,
             'exchange_rate' => $exchange_rate,
             'base_total' => MoneyConversion::toBaseMinor($estimate->total, $exchange_rate),
             'base_discount_val' => MoneyConversion::toBaseMinor($estimate->discount_val, $exchange_rate),

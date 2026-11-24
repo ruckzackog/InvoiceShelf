@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\CompanySetting;
 use App\Models\Customer;
 use App\Models\Estimate;
+use App\Rules\EstimateDocument;
 use App\Support\DocumentTotals;
 use App\Support\MoneyConversion;
 use Illuminate\Foundation\Http\FormRequest;
@@ -65,6 +66,11 @@ class EstimatesRequest extends FormRequest
             ],
             'template_name' => [
                 'required',
+            ],
+            'document' => [
+                'nullable',
+                'array',
+                new EstimateDocument,
             ],
             'items' => [
                 'required',

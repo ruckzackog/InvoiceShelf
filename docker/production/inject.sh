@@ -88,3 +88,15 @@ fi
 if [ "$CRON_JOB_AUTH_TOKEN" != '' ]; then
    replace_or_insert "CRON_JOB_AUTH_TOKEN" "$CRON_JOB_AUTH_TOKEN"
 fi
+# PDF rendering (config/pdf.php). Plain values: no spaces.
+for name in PDF_DRIVER PDF_GOTENBERG_TEMPLATES GOTENBERG_HOST GOTENBERG_PAPERSIZE GOTENBERG_ALLOWED_PRIVATE_HOST; do
+   if [ "${!name}" != '' ]; then
+      replace_or_insert "$name" "${!name}"
+   fi
+done
+# Footer line of the offer document: free text with spaces, so it is quoted. Quotes,
+# backslashes, "|" and "&" are dropped, they would break the .env file or the sed above.
+if [ "$ANGEBOT_FOOTER_LINE" != '' ]; then
+   value=$(printf '%s' "$ANGEBOT_FOOTER_LINE" | tr -d '"\\|&')
+   replace_or_insert "ANGEBOT_FOOTER_LINE" "\"$value\""
+fi

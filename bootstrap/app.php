@@ -49,6 +49,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'login',
         ]);
 
+        // The offer document is Tiptap JSON: a text node may end in a space
+        // (e.g. "Sehr geehrter Herr " before a field), so it must not be trimmed.
+        $middleware->trimStrings(except: ['document.*']);
+
         $middleware->append([
             CheckForMaintenanceMode::class,
             TrimStrings::class,

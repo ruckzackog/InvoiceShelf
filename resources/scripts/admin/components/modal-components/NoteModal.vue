@@ -130,7 +130,8 @@ let isSaving = ref(false)
 const types = reactive([
   {label: t('settings.customization.notes.types.invoice'), value: 'Invoice'},
   {label: t('settings.customization.notes.types.estimate'), value: 'Estimate'},
-  {label: t('settings.customization.notes.types.payment'), value: 'Payment'}
+  {label: t('settings.customization.notes.types.payment'), value: 'Payment'},
+  {label: t('settings.customization.notes.types.estimate_block'), value: 'EstimateBlock'}
 ])
 let fields = ref(['customer', 'customerCustom'])
 

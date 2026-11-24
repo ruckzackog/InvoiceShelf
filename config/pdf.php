@@ -15,6 +15,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Templates that always use Gotenberg
+    |--------------------------------------------------------------------------
+    | Comma separated template names (e.g. "angebot-dokument"). These are
+    | rendered with Gotenberg whatever the driver above is, so a Chromium
+    | template can be added without moving every other template off dompdf.
+    |
+    */
+
+    'gotenberg_templates' => env('PDF_GOTENBERG_TEMPLATES', ''),
+
+    /*
+    | Extra line in the page footer of the offer document, for company data
+    | InvoiceShelf has no field for (e.g. e-mail, website, Firmenbuchnummer).
+    */
+
+    'angebot_footer_line' => env('ANGEBOT_FOOTER_LINE', ''),
+
+    /*
+    |--------------------------------------------------------------------------
     | PDF Connections
     |--------------------------------------------------------------------------
     |
