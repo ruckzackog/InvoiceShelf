@@ -1792,7 +1792,7 @@
     "start": {
       "title": "Neues Angebot",
       "new": "Neu schreiben",
-      "new_hint": "Mit Konzept und Workshop am Anfang und Test, Go-live und Einschulung am Ende. Dazwischen die Pakete für dieses Projekt.",
+      "new_hint": "Konzept, Design, Entwicklung sowie Test und Go-live als Startpunkt. Umbenennen, ergänzen, eigene Pakete dazwischen.",
       "new_button": "Angebot beginnen",
       "copy": "Ähnliches Angebot kopieren",
       "copy_hint": "Dokument und Pakete werden übernommen, mit neuer Nummer und neuem Datum.",

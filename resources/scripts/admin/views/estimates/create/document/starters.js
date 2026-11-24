@@ -1,7 +1,7 @@
 /**
- * The frame of a new offer: the work packages almost every project starts and
- * ends with. The middle packages are specific to each project and are written
- * in the document.
+ * The frame of a new offer: the work packages almost every project has, in
+ * this order. Design and Technische Entwicklung are starting points to rename
+ * and extend; project-specific packages go between them.
  *
  * Each package is taken from the item (Artikel) with that name when there is
  * one, so price and text can be maintained in InvoiceShelf. Without an item,
@@ -15,6 +15,24 @@ export const FRAME_PACKAGES = [
       '- Workshop: Ziele, Zielgruppen und Inhalte gemeinsam klären und priorisieren',
       '- Seitenstruktur: Navigation und Seitentypen festlegen',
       '- Zusammenfassung: Ergebnisse schriftlich festhalten, als Grundlage für Design und Umsetzung',
+    ].join('\n'),
+  },
+  {
+    name: 'Design und Prototyping',
+    description: [
+      'Dieses Arbeitspaket umfasst die Gestaltung als klickbaren Prototyp.',
+      '- Klickbarer Prototyp: Gestaltung der wichtigsten Seiten für Desktop und Smartphone',
+      '- Abstimmung: Gemeinsames Durchgehen und eine Korrekturrunde',
+    ].join('\n'),
+  },
+  {
+    // The place for the project itself: rename it and add the activities.
+    name: 'Technische Entwicklung',
+    description: [
+      'Dieses Arbeitspaket umfasst die technische Umsetzung auf Basis des freigegebenen Designs.',
+      '- Einrichtung: System, Hosting und Staging-Umgebung aufsetzen',
+      '- Umsetzung: Seitenvorlagen und Funktionen nach freigegebenem Design',
+      '- Inhalte: Übernahme der gelieferten Texte und Bilder',
     ].join('\n'),
   },
   {
