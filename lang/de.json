@@ -1646,6 +1646,8 @@
   "pdf_angebot_recommended": "Empfehlung",
   "pdf_angebot_hosting_net": "Preise netto pro Monat, zuzüglich Umsatzsteuer.",
   "pdf_angebot_page": "Seite",
+  "pdf_angebot_place_date": "Ort, Datum",
+  "pdf_angebot_signature": "Unterschrift Auftraggeber",
   "pdf_invoice_label": "Rechnung",
   "pdf_invoice_number": "Rechnungsnummer",
   "pdf_invoice_date": "Rechnungsdatum",

@@ -56,11 +56,30 @@ class DocumentRenderer
         }
 
         $html = '';
+        $breakBefore = false;
 
         foreach ($content as $child) {
-            if (is_array($child)) {
-                $html .= $this->node($child, $depth + 1);
+            if (! is_array($child)) {
+                continue;
             }
+
+            // A page break starts the next block on a new page. It is set on that
+            // block instead of an empty element, so a break that falls on a page
+            // end anyway does not leave a blank page.
+            if (($child['type'] ?? null) === 'pageBreak') {
+                $breakBefore = $html !== '';
+
+                continue;
+            }
+
+            $rendered = $this->node($child, $depth + 1);
+
+            if ($breakBefore && $rendered !== '') {
+                $rendered = '<div class="page-break">'.$rendered.'</div>';
+                $breakBefore = false;
+            }
+
+            $html .= $rendered;
         }
 
         return $html;
@@ -92,7 +111,7 @@ class DocumentRenderer
             'tableRow' => '<tr>'.$inner().'</tr>',
             'tableHeader' => '<th'.$this->span($attrs).'>'.$inner().'</th>',
             'tableCell' => '<td'.$this->span($attrs).'>'.$inner().'</td>',
-            'pageBreak' => '<div class="page-break"></div>',
+            'signature' => $this->view('signature'),
             'field' => $this->field($attrs),
             'offerMeta' => $this->offerMeta($attrs),
             'estimateItems' => $this->view('items'),

@@ -175,6 +175,9 @@ test('marks, links, headings, alignment and tables render', function () {
             ]],
         ]],
         ['type' => 'pageBreak'],
+        paragraph('Neue Seite'),
+        ['type' => 'pageBreak'],
+        ['type' => 'signature'],
     ));
 
     expect($html)
@@ -184,7 +187,9 @@ test('marks, links, headings, alignment and tables render', function () {
         ->toContain('<h3 class="align-right">Titel</h3>')
         ->toContain('<th colspan="2"><p>Phase</p></th>')
         ->toContain('<td><p>KW 49</p></td>')
-        ->toContain('<div class="page-break"></div>');
+        ->toContain('<div class="page-break"><p>Neue Seite</p></div>')
+        ->toContain('doc-signature')
+        ->and(substr_count($html, 'page-break'))->toBe(2);
 });
 
 test('fields resolve and are escaped', function () {

@@ -140,8 +140,7 @@
 .angebot-doc .align-justify { text-align: justify; }
 
 .angebot-doc .page-break {
-  break-after: page;
-  height: 0;
+  break-before: page;
 }
 
 /* Tables written in the editor (e.g. timeline) and bound tables */
@@ -262,6 +261,11 @@
 
 /* Hosting packages */
 
+.angebot-doc .doc-hosting,
+.angebot-doc .doc-costs {
+  break-inside: avoid;
+}
+
 .angebot-doc .doc-hosting .doc-recommended td {
   background: var(--doc-surface);
 }
@@ -281,6 +285,23 @@
 
 .angebot-doc .doc-note {
   font-size: 8.5pt;
+  color: var(--doc-muted);
+}
+
+/* Signature lines */
+
+.angebot-doc .doc-signature {
+  display: flex;
+  gap: 12mm;
+  margin: 14mm 0 0;
+  break-inside: avoid;
+}
+
+.angebot-doc .doc-signature > div {
+  flex: 1;
+  padding-top: 1.5mm;
+  border-top: 0.75pt solid var(--doc-text);
+  font-size: 8pt;
   color: var(--doc-muted);
 }
 

@@ -1652,6 +1652,8 @@
   "pdf_angebot_recommended": "Recommended",
   "pdf_angebot_hosting_net": "Net prices per month, plus VAT.",
   "pdf_angebot_page": "Page",
+  "pdf_angebot_place_date": "Place, date",
+  "pdf_angebot_signature": "Client signature",
   "pdf_invoice_label": "Invoice",
   "pdf_invoice_number": "Invoice Number",
   "pdf_invoice_date": "Invoice Date",
