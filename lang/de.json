@@ -1811,6 +1811,8 @@
       "estimate": "Ihr Angebot {number} von {company}",
       "invoice": "Ihre Rechnung {number} von {company}",
       "payment": "Zahlungsbestätigung {number} von {company}"
-    }
+    },
+    "hosting_make_recommended": "Klicken: als Empfehlung markieren",
+    "hosting_unrecommend": "Klicken: Empfehlung entfernen"
   }
 }

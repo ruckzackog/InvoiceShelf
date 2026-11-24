@@ -1817,6 +1817,8 @@
       "estimate": "Your estimate {number} from {company}",
       "invoice": "Your invoice {number} from {company}",
       "payment": "Payment receipt {number} from {company}"
-    }
+    },
+    "hosting_make_recommended": "Click to mark as recommended",
+    "hosting_unrecommend": "Click to remove the recommendation"
   }
 }

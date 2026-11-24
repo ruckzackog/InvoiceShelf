@@ -29,7 +29,14 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="pkg in packages" :key="pkg.id" :class="{ 'doc-recommended': pkg.id === node.attrs.recommendedId }">
+        <tr
+          v-for="pkg in packages"
+          :key="pkg.id"
+          class="doc-hosting-row"
+          :class="{ 'doc-recommended': pkg.id === node.attrs.recommendedId }"
+          :title="$t(pkg.id === node.attrs.recommendedId ? 'angebot_document.hosting_unrecommend' : 'angebot_document.hosting_make_recommended')"
+          @click="toggleRecommended(pkg.id)"
+        >
           <td>
             <strong>{{ pkg.name }}</strong>
             <span v-if="pkg.id === node.attrs.recommendedId" class="doc-badge">{{ $t('pdf_angebot_recommended') }}</span>
@@ -91,6 +98,11 @@ function toggle(id) {
     itemIds: ids,
     recommendedId: ids.includes(props.node.attrs.recommendedId) ? props.node.attrs.recommendedId : null,
   })
+}
+
+// A click on a package row makes it the recommendation, a second click removes it.
+function toggleRecommended(id) {
+  props.updateAttributes({ recommendedId: props.node.attrs.recommendedId === id ? null : id })
 }
 
 function setRecommended(value) {

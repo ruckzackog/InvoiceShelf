@@ -743,6 +743,14 @@ function insertBaustein(note) {
   color: #cb0c9f;
 }
 
+.doc-hosting-row {
+  cursor: pointer;
+}
+
+.doc-hosting-row:not(.doc-recommended):hover td {
+  background: rgb(203 12 159 / 0.05);
+}
+
 .doc-block-panel {
   display: flex;
   flex-wrap: wrap;
