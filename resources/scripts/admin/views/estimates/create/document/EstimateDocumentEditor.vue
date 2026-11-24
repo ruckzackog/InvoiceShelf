@@ -243,6 +243,7 @@ async function loadDocument() {
   if (document && document.type === 'doc') {
     editor.value.commands.setContent(document, { emitUpdate: false })
     readAddress()
+    await expandBausteinRefs()
     return
   }
 
@@ -333,6 +334,28 @@ function offerMetaNode() {
     if (!found && node.type.name === 'offerMeta') found = { node, pos }
   })
   return found
+}
+
+/**
+ * Offers drafted by the ops agent refer to Bausteine by name. Opening the offer
+ * turns each reference into the Baustein's text (Sie or du version), from then
+ * on it is normal content like an inserted Baustein.
+ */
+async function expandBausteinRefs() {
+  const refs = []
+  editor.value.state.doc.descendants((node, pos) => {
+    if (node.type.name === 'baustein') refs.push({ node, pos })
+  })
+  if (!refs.length) return
+
+  await loadBausteine().catch(() => {})
+  for (const { node, pos } of refs.reverse()) {
+    const note = bausteinFor(allBausteine.value, node.attrs.name, node.attrs.address)
+    editor.value
+      .chain()
+      .insertContentAt({ from: pos, to: pos + node.nodeSize }, note?.notes || '')
+      .run()
+  }
 }
 
 function readAddress() {

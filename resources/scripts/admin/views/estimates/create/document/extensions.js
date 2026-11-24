@@ -78,6 +78,9 @@ export const HostingPackages = boundBlock('hostingPackages', HostingView, {
   recommendedId: null,
 })
 export const Signature = boundBlock('signature', SignatureView)
+// A reference to a Baustein written by the ops agent. The editor replaces it
+// with the Baustein's text right after loading (EstimateDocumentEditor).
+export const BausteinRef = boundBlock('baustein', PageBreakView, { name: '', address: 'sie' })
 export const PageBreak = boundBlock('pageBreak', PageBreakView)
 
 export const Field = Node.create({
@@ -148,6 +151,7 @@ export function documentExtensions({ onEditPositions, titlePlaceholder = '' }) {
     HostingPackages,
     Signature,
     PageBreak,
+    BausteinRef,
     Field,
   ]
 }

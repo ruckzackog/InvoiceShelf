@@ -435,3 +435,17 @@ test('autosave can create a draft without rendering a PDF', function () {
     postJson('api/v1/estimates', $payload, ['X-Autosave' => '1'])->assertStatus(201);
     Bus::assertNotDispatched(GenerateEstimatePdfJob::class);
 });
+
+test('a Baustein reference renders the current note, du version first', function () {
+    $estimate = documentEstimate();
+    Note::query()->create(['company_id' => $estimate->company_id, 'type' => 'EstimateBlock', 'name' => 'Annahme', 'notes' => '<h2>Annahme</h2><p>Bitte bestätigen Sie.</p><script>x</script>']);
+    Note::query()->create(['company_id' => $estimate->company_id, 'type' => 'EstimateBlock', 'name' => 'Annahme (du)', 'notes' => '<p>Bitte bestätigt.</p>']);
+
+    $sie = render($estimate, doc(['type' => 'baustein', 'attrs' => ['name' => 'Annahme']]));
+    $du = render($estimate, doc(['type' => 'baustein', 'attrs' => ['name' => 'Annahme', 'address' => 'du']]));
+    $missing = render($estimate, doc(['type' => 'baustein', 'attrs' => ['name' => 'Gibt es nicht', 'address' => 'du']]));
+
+    expect($sie)->toContain('Bitte bestätigen Sie.')->not->toContain('<script')
+        ->and($du)->toContain('Bitte bestätigt.')
+        ->and($missing)->toBe('');
+});

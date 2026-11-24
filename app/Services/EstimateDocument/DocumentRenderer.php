@@ -5,7 +5,9 @@ namespace App\Services\EstimateDocument;
 use App\Models\Currency;
 use App\Models\Estimate;
 use App\Models\Item;
+use App\Models\Note;
 use App\Models\Tax;
+use App\Support\PdfHtmlSanitizer;
 use Illuminate\Support\Collection;
 
 /**
@@ -112,6 +114,7 @@ class DocumentRenderer
             'tableHeader' => '<th'.$this->span($attrs).'>'.$inner().'</th>',
             'tableCell' => '<td'.$this->span($attrs).'>'.$inner().'</td>',
             'signature' => $this->view('signature'),
+            'baustein' => $this->baustein($attrs),
             'field' => $this->field($attrs),
             'offerMeta' => $this->offerMeta($attrs),
             'estimateItems' => $this->view('items'),
@@ -226,6 +229,35 @@ class DocumentRenderer
         }
 
         return $this->fields;
+    }
+
+    /**
+     * A reference to a Baustein (written by the ops agent). Rendered from the
+     * current note; the editor turns it into normal text when the offer is
+     * opened, so later changes of the Baustein do not reach a sent offer.
+     * Uses the "<name> (du)" version when the offer is set to du.
+     *
+     * @param  array<mixed>  $attrs
+     */
+    protected function baustein(array $attrs): string
+    {
+        $name = $attrs['name'] ?? null;
+
+        if (! is_string($name) || $name === '') {
+            return '';
+        }
+
+        $du = ($attrs['address'] ?? 'sie') === 'du';
+        $notes = Note::query()
+            ->where('company_id', $this->estimate->company_id)
+            ->where('type', 'EstimateBlock')
+            ->whereIn('name', [$name, $name.' (du)'])
+            ->get()
+            ->keyBy('name');
+
+        $note = ($du ? $notes->get($name.' (du)') : null) ?? $notes->get($name);
+
+        return $note ? '<div class="doc-baustein">'.PdfHtmlSanitizer::sanitize((string) $note->notes).'</div>' : '';
     }
 
     /**
