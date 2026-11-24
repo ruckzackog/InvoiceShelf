@@ -3,6 +3,7 @@ import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import TextAlign from '@tiptap/extension-text-align'
 import { TableKit } from '@tiptap/extension-table'
+import { Placeholder } from '@tiptap/extensions'
 import OfferMetaView from './nodes/OfferMetaView.vue'
 import ItemsView from './nodes/ItemsView.vue'
 import TotalsView from './nodes/TotalsView.vue'
@@ -120,8 +121,13 @@ export const BLOCK_TYPES = [
   'pageBreak',
 ]
 
-export function documentExtensions({ onEditPositions }) {
+export function documentExtensions({ onEditPositions, titlePlaceholder = '' }) {
   return [
+    Placeholder.configure({
+      // Only the title gets a hint; empty paragraphs stay clean.
+      placeholder: ({ node }) => (node.type.name === 'heading' && node.attrs.level === 1 ? titlePlaceholder : ''),
+      showOnlyCurrent: false,
+    }),
     StarterKit.configure({
       // The PDF renderer has no code nodes: keep them out so nothing is lost.
       code: false,

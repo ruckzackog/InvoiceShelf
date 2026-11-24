@@ -315,7 +315,7 @@
     "add_item": "Fügen Sie ein Artikel hinzu",
     "date": "Datum",
     "due_date": "Fälligkeit",
-    "expiry_date": "Zahlungsziel",
+    "expiry_date": "Gültig bis",
     "status": "Status",
     "add_tax": "Steuer hinzufügen",
     "amount": "Summe",
@@ -1773,6 +1773,33 @@
     "add_package": "Arbeitspaket",
     "add_from_items": "Aus Artikeln übernehmen …",
     "more_in_form": "Rabatt und Steuern im Formular",
-    "monthly_warning": "Monatlicher Preis: gehört zu „Hosting & Betreuung“, nicht in die Projektkosten."
+    "monthly_warning": "Monatlicher Preis: gehört zu „Hosting & Betreuung“, nicht in die Projektkosten.",
+    "finish": "Fertig",
+    "date": "Datum",
+    "valid_until": "Gültig bis",
+    "tax": "Umsatzsteuer",
+    "settings_open": "Rabatt, Steuer und Vorlage",
+    "settings_title": "Rabatt, Steuer und Vorlage",
+    "title_placeholder": "Titel des Projekts",
+    "save_state": {
+      "saved": "Gespeichert",
+      "dirty": "Änderungen …",
+      "saving": "Speichert …",
+      "invalid": "Nicht gespeichert: Kunde und Namen der Arbeitspakete fehlen",
+      "error": "Speichern fehlgeschlagen, neuer Versuch bei der nächsten Änderung",
+      "new": "Noch nicht gespeichert"
+    },
+    "start": {
+      "title": "Neues Angebot",
+      "subtitle": "Womit möchten Sie beginnen? Arbeitspakete und Texte können Sie danach frei ändern.",
+      "website": "Website",
+      "shop": "Shop",
+      "custom": "Individuell",
+      "empty": "Leer",
+      "packages": "{count} Arbeitspakete",
+      "empty_hint": "Nur der Standardaufbau",
+      "classic": "Ohne Dokument, klassisches Formular"
+    },
+    "items_table": "Positionen als Tabelle"
   }
 }

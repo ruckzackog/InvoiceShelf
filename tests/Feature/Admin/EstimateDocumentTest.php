@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\SeedAngebotBausteine;
+use App\Jobs\GenerateEstimatePdfJob;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Estimate;
@@ -14,6 +15,7 @@ use App\Services\EstimateDocument\DocumentRenderer;
 use App\Services\PDFDrivers\GotenbergPDFDriver;
 use App\Services\PDFService;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Bus;
 use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\getJson;
@@ -384,4 +386,39 @@ test('a package with only a feature list prints one column', function () {
         ->toContain('<td colspan="2">Kostenlose Domain</td>')
         ->toContain('<p>Website-Paket inkl. 1 Jahr:</p>')
         ->not->toContain(__('pdf_angebot_description'));
+});
+
+test('autosave saves without rendering a PDF, a regular save renders one', function () {
+    Bus::fake([GenerateEstimatePdfJob::class]);
+    $estimate = documentEstimate();
+
+    $payload = Estimate::factory()->raw([
+        'estimate_number' => $estimate->estimate_number,
+        'customer_id' => $estimate->customer_id,
+        'template_name' => 'angebot-dokument',
+        'items' => [EstimateItem::factory()->raw()],
+        'taxes' => [Tax::factory()->raw()],
+        'document' => doc(paragraph('Entwurf')),
+    ]);
+
+    putJson("api/v1/estimates/{$estimate->id}", $payload, ['X-Autosave' => '1'])->assertOk();
+    Bus::assertNotDispatched(GenerateEstimatePdfJob::class);
+    expect($estimate->fresh()->document)->toBe(doc(paragraph('Entwurf')));
+
+    putJson("api/v1/estimates/{$estimate->id}", $payload)->assertOk();
+    Bus::assertDispatched(GenerateEstimatePdfJob::class);
+});
+
+test('autosave can create a draft without rendering a PDF', function () {
+    Bus::fake([GenerateEstimatePdfJob::class]);
+
+    $payload = Estimate::factory()->raw([
+        'estimate_number' => 'EST-AUTO-1',
+        'template_name' => 'angebot-dokument',
+        'items' => [EstimateItem::factory()->raw()],
+        'taxes' => [Tax::factory()->raw()],
+    ]);
+
+    postJson('api/v1/estimates', $payload, ['X-Autosave' => '1'])->assertStatus(201);
+    Bus::assertNotDispatched(GenerateEstimatePdfJob::class);
 });

@@ -23,6 +23,30 @@ export const DEFAULT_HOSTING_PACKAGES = [
   'Businesscare Plus',
 ]
 
+const CONTACT_KEY = 'angebot.contact'
+
+/** The contact person last used in an offer on this computer. */
+export function rememberedContact() {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(CONTACT_KEY) || '{}')
+    return {
+      contactName: String(stored.contactName || ''),
+      contactEmail: String(stored.contactEmail || ''),
+      contactPhone: String(stored.contactPhone || ''),
+    }
+  } catch {
+    return { contactName: '', contactEmail: '', contactPhone: '' }
+  }
+}
+
+export function rememberContact(contact) {
+  try {
+    window.localStorage.setItem(CONTACT_KEY, JSON.stringify(contact))
+  } catch {
+    // Private window or blocked storage: the field just is not prefilled next time.
+  }
+}
+
 function block(type, attrs = {}) {
   const data = Object.entries(attrs)
     .map(([key, value]) => ` data-${key}='${JSON.stringify(value).replace(/'/g, '&#39;')}'`)
@@ -31,7 +55,7 @@ function block(type, attrs = {}) {
   return `<div data-node="${type}"${data}></div>`
 }
 
-export default function defaultDocument(bausteine = [], items = []) {
+export default function defaultDocument(bausteine = [], items = [], contact = {}) {
   const byName = Object.fromEntries(bausteine.map((note) => [note.name, note.notes]))
   const baustein = (name) => byName[name] || ''
   const hostingIds = DEFAULT_HOSTING_PACKAGES
@@ -39,8 +63,9 @@ export default function defaultDocument(bausteine = [], items = []) {
     .filter(Boolean)
 
   return [
-    '<h1>Titel des Projekts</h1>',
-    block('offerMeta'),
+    // Empty: the editor shows "Titel des Projekts" as a placeholder.
+    '<h1></h1>',
+    block('offerMeta', contact),
     baustein('Einleitung'),
     '<h2>Leistungsumfang</h2>',
     '<p>Das Projekt ist in Arbeitspakete gegliedert. Jedes Paket nennt die enthaltenen Tätigkeiten und den Betrag.</p>',

@@ -1779,6 +1779,33 @@
     "add_package": "Work package",
     "add_from_items": "Add from items …",
     "more_in_form": "Discount and taxes in the form",
-    "monthly_warning": "Monthly price: belongs to hosting and care, not to the project cost."
+    "monthly_warning": "Monthly price: belongs to hosting and care, not to the project cost.",
+    "finish": "Done",
+    "date": "Date",
+    "valid_until": "Valid until",
+    "tax": "VAT",
+    "settings_open": "Discount, tax and template",
+    "settings_title": "Discount, tax and template",
+    "title_placeholder": "Project title",
+    "save_state": {
+      "saved": "Saved",
+      "dirty": "Unsaved changes",
+      "saving": "Saving …",
+      "invalid": "Not saved: customer and work package names missing",
+      "error": "Saving failed, retrying on the next change",
+      "new": "Not saved yet"
+    },
+    "start": {
+      "title": "New estimate",
+      "subtitle": "Where do you want to start? You can change work packages and text afterwards.",
+      "website": "Website",
+      "shop": "Shop",
+      "custom": "Custom",
+      "empty": "Empty",
+      "packages": "{count} work packages",
+      "empty_hint": "Standard layout only",
+      "classic": "Without document, classic form"
+    },
+    "items_table": "Items as a table"
   }
 }

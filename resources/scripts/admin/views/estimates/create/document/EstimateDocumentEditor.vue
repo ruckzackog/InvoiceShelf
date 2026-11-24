@@ -1,5 +1,6 @@
 <template>
-  <div class="doc-editor">
+  <div class="doc-workspace">
+    <div class="doc-main">
     <div v-if="editor" class="doc-toolbar">
       <div class="doc-toolbar-group">
         <button type="button" class="doc-icon" :title="$t('angebot_document.undo')" @click="run((c) => c.undo())">
@@ -75,39 +76,10 @@
         <BaseDropdownItem @click="run((c) => c.deleteTable())">{{ $t('angebot_document.delete_table') }}</BaseDropdownItem>
       </BaseDropdown>
 
-      <div class="doc-toolbar-end">
-        <BaseDropdown width-class="w-72">
-          <template #activator>
-            <span class="doc-insert-button" @click="loadBausteine">
-              <PlusIcon />
-              {{ $t('angebot_document.insert') }}
-              <ChevronDownIcon />
-            </span>
-          </template>
-          <div class="doc-menu-section">{{ $t('angebot_document.insert_block') }}</div>
-          <BaseDropdownItem v-for="type in BLOCK_TYPES" :key="type" @click="insertBlock(type)">
-            {{ $t(`angebot_document.blocks.${type}`) }}
-          </BaseDropdownItem>
-          <BaseDropdownItem @click="run((c) => c.insertTable({ rows: 3, cols: 3, withHeaderRow: true }))">
-            {{ $t('angebot_document.table') }}
-          </BaseDropdownItem>
-          <div class="doc-menu-section">{{ $t('angebot_document.insert_baustein') }}</div>
-          <BaseDropdownItem v-for="note in bausteine" :key="note.id" @click="insertBaustein(note)">
-            {{ note.name }}
-          </BaseDropdownItem>
-          <p v-if="bausteineLoaded && !bausteine.length" class="px-4 py-2 text-xs text-gray-500">
-            {{ $t('angebot_document.no_bausteine') }}
-          </p>
-          <div class="doc-menu-section">{{ $t('angebot_document.insert_field') }}</div>
-          <BaseDropdownItem v-for="key in FIELD_KEYS" :key="key" @click="insertField(key)">
-            {{ $t(`angebot_document.fields.${key}`) }}
-          </BaseDropdownItem>
-        </BaseDropdown>
-      </div>
     </div>
 
-    <div class="doc-canvas">
-      <div class="angebot-doc doc-page">
+    <div ref="canvas" class="doc-canvas">
+      <div class="angebot-doc doc-page" :style="{ zoom }">
         <div class="doc-letterhead">
           <div>
             <img v-if="company?.logo" class="doc-logo" :src="company.logo" :alt="company?.name" />
@@ -124,11 +96,42 @@
         <div class="doc-page-footer">{{ $t('angebot_document.footer_preview') }} · {{ $t('angebot_document.page_hint') }}</div>
       </div>
     </div>
+    </div>
+
+    <aside class="doc-panel">
+      <slot name="panel" />
+
+      <section class="doc-card">
+        <h4 class="doc-card-title">{{ $t('angebot_document.insert') }}</h4>
+        <button type="button" class="doc-insert-item doc-insert-item--main" @click="addWorkPackage">
+          <PlusIcon /> {{ $t('angebot_document.add_package') }}
+        </button>
+        <button v-for="type in panelBlocks" :key="type" type="button" class="doc-insert-item" @click="insertBlock(type)">
+          {{ $t(`angebot_document.blocks.${type}`) }}
+        </button>
+        <button type="button" class="doc-insert-item" @click="run((c) => c.insertTable({ rows: 3, cols: 3, withHeaderRow: true }))">
+          {{ $t('angebot_document.table') }}
+        </button>
+
+        <h5 class="doc-card-subtitle">{{ $t('angebot_document.insert_baustein') }}</h5>
+        <button v-for="note in bausteine" :key="note.id" type="button" class="doc-insert-item" @click="insertBaustein(note)">
+          {{ note.name }}
+        </button>
+        <p v-if="bausteineLoaded && !bausteine.length" class="doc-card-hint">
+          {{ $t('angebot_document.no_bausteine') }}
+        </p>
+
+        <h5 class="doc-card-subtitle">{{ $t('angebot_document.insert_field') }}</h5>
+        <button v-for="key in FIELD_KEYS" :key="key" type="button" class="doc-insert-item" @click="insertField(key)">
+          {{ $t(`angebot_document.fields.${key}`) }}
+        </button>
+      </section>
+    </aside>
   </div>
 </template>
 
 <script setup>
-import { computed, markRaw, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, markRaw, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   ArrowUturnLeftIcon,
@@ -150,12 +153,12 @@ import { useEstimateStore } from '@/scripts/admin/stores/estimate'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useNotesStore } from '@/scripts/admin/stores/note'
 import { useItemStore } from '@/scripts/admin/stores/item'
-import { BLOCK_TYPES, FIELD_KEYS, documentExtensions } from './extensions'
-import defaultDocument from './defaultDocument'
+import { FIELD_KEYS, documentExtensions } from './extensions'
+import defaultDocument, { rememberedContact } from './defaultDocument'
 import '@/css/angebot-fonts.css'
 import '@/css/angebot-document.css'
 
-const emit = defineEmits(['edit-positions'])
+const emit = defineEmits(['open-settings'])
 
 const { t } = useI18n()
 
@@ -199,7 +202,10 @@ const senderLines = computed(() => {
 })
 
 const editor = useEditor({
-  extensions: documentExtensions({ onEditPositions: () => emit('edit-positions') }),
+  extensions: documentExtensions({
+    onEditPositions: () => emit('open-settings'),
+    titlePlaceholder: t('angebot_document.title_placeholder'),
+  }),
   content: null,
   onUpdate: ({ editor }) => {
     estimateStore.newEstimate.document = editor.getJSON()
@@ -222,15 +228,62 @@ async function loadDocument() {
 
   // New document: standard layout with the current Bausteine and hosting packages.
   await Promise.all([loadBausteine(), loadItems()]).catch(() => {})
-  editor.value.commands.setContent(defaultDocument(bausteine.value, itemStore.items), { emitUpdate: false })
+  editor.value.commands.setContent(defaultDocument(bausteine.value, itemStore.items, rememberedContact()), {
+    emitUpdate: false,
+  })
   estimateStore.newEstimate.document = editor.value.getJSON()
 }
 
 watch([editor, () => estimateStore.isFetchingInitialSettings], loadDocument, { immediate: true })
 
+// Blocks in the side panel; positions have their own button (addWorkPackage).
+const panelBlocks = ['hostingPackages', 'estimateTotals', 'offerMeta', 'signature', 'pageBreak']
+
+// The A4 page shrinks to fit narrower windows instead of scrolling sideways.
+const canvas = ref(null)
+const zoom = ref(1)
+let resizeObserver = null
+
+onMounted(() => {
+  loadBausteine().catch(() => {})
+  resizeObserver = new ResizeObserver(([entry]) => {
+    const pageWidth = 794 // 210mm at 96 dpi
+    zoom.value = Math.min(1, Math.max(0.5, (entry.contentRect.width - 32) / pageWidth))
+  })
+  resizeObserver.observe(canvas.value)
+})
+
 onBeforeUnmount(() => {
+  resizeObserver?.disconnect()
   editor.value?.destroy()
 })
+
+/**
+ * Adds a work package: a new position in the estimate, shown by the work
+ * packages block. Inserts that block at the cursor if the document has none.
+ */
+function addWorkPackage() {
+  const items = estimateStore.newEstimate.items
+  const onlyEmpty = items.length === 1 && !items[0].name && !items[0].price
+  if (!onlyEmpty) {
+    estimateStore.addItem()
+  }
+
+  let hasBlock = false
+  editor.value.state.doc.descendants((node) => {
+    if (node.type.name === 'estimateItems') hasBlock = true
+  })
+  if (!hasBlock) {
+    insertBlock('estimateItems')
+  }
+
+  nextTick(() => {
+    const titles = document.querySelectorAll('.doc-package-title')
+    const last = titles[titles.length - 1]
+    last?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    last?.focus({ preventScroll: true })
+  })
+}
 
 function run(command) {
   command(editor.value.chain().focus()).run()
@@ -267,6 +320,103 @@ function insertBaustein(note) {
 </script>
 
 <style>
+.doc-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 20px;
+  align-items: start;
+}
+
+.doc-main {
+  min-width: 0;
+}
+
+.doc-panel {
+  position: sticky;
+  top: 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: calc(100vh - 88px);
+  overflow-y: auto;
+  padding-bottom: 12px;
+}
+
+.doc-panel > * {
+  flex-shrink: 0;
+}
+
+.doc-card {
+  padding: 14px 14px 12px;
+  background: #fff;
+  border: 1px solid rgb(229 231 235);
+  border-radius: 10px;
+}
+
+.doc-card-title {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgb(107 114 128);
+}
+
+.doc-card-subtitle {
+  margin: 12px 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgb(156 163 175);
+}
+
+.doc-card-hint {
+  margin: 4px 0;
+  font-size: 12px;
+  color: rgb(107 114 128);
+}
+
+.doc-insert-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 5px 8px;
+  margin: 0 -8px;
+  width: calc(100% + 16px);
+  font-size: 13px;
+  text-align: left;
+  color: rgb(55 65 81);
+  border-radius: 6px;
+}
+
+.doc-insert-item:hover {
+  background: rgb(243 244 246);
+}
+
+.doc-insert-item svg {
+  width: 16px;
+  height: 16px;
+}
+
+.doc-insert-item--main {
+  font-weight: 600;
+  color: var(--color-primary-600);
+}
+
+@media (max-width: 1023px) {
+  .doc-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .doc-panel {
+    position: static;
+    max-height: none;
+    order: -1;
+  }
+}
+
 .doc-toolbar {
   position: sticky;
   top: 72px;
@@ -411,9 +561,9 @@ function insertBaustein(note) {
   min-height: 150mm;
 }
 
-.doc-page .ProseMirror p.is-editor-empty:first-child::before {
+.doc-page .ProseMirror .is-empty::before {
   content: attr(data-placeholder);
-  color: #aaa;
+  color: #c4c4c4;
   float: left;
   height: 0;
   pointer-events: none;
