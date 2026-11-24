@@ -17,7 +17,9 @@
     @classic="startClassic"
   />
 
-  <BasePage class="relative estimate-create-page">
+  <!-- Hidden (not unmounted) until a start is chosen: no flash of the old form behind the
+       dialog, while customers, templates and items still load in the background. -->
+  <BasePage v-show="!showStartDialog" class="relative estimate-create-page">
     <form @submit.prevent="submitForm">
       <!-- Offer document (template angebot-dokument): its own header bar, no form above the page -->
       <div v-if="isDocumentTemplate" class="doc-header">
