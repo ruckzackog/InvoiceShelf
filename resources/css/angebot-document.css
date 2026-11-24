@@ -1,0 +1,304 @@
+/*
+ * Offer document ("angebot-dokument" template).
+ *
+ * One stylesheet for the editor and the PDF: the editor imports it through Vite,
+ * the PDF template inlines it. Every rule is scoped to .angebot-doc so nothing
+ * leaks into the admin app. Change the look here and both follow.
+ *
+ * Units are mm and pt so the editor page and the printed A4 page match.
+ */
+
+.angebot-doc {
+  --doc-text: #2c2f31;
+  --doc-muted: #6b6b6b;
+  --doc-line: #d9d9d9;
+  --doc-surface: #f6f6f7;
+  --doc-accent: #cb0c9f;
+
+  box-sizing: border-box;
+  width: 210mm;
+  padding: 0 20mm;
+  color: var(--doc-text);
+  background: #fff;
+  font-family: 'Angebot Lato', 'Lato', Arial, sans-serif;
+  font-size: 9.5pt;
+  line-height: 1.5;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.angebot-doc *,
+.angebot-doc *::before,
+.angebot-doc *::after {
+  box-sizing: border-box;
+}
+
+/* Letterhead */
+
+.angebot-doc .doc-letterhead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10mm;
+  padding: 0 0 6mm;
+  border-bottom: 0.75pt solid var(--doc-line);
+  margin-bottom: 10mm;
+}
+
+.angebot-doc .doc-logo {
+  max-height: 14mm;
+  max-width: 60mm;
+}
+
+.angebot-doc .doc-sender {
+  font-size: 7.5pt;
+  line-height: 1.45;
+  color: var(--doc-muted);
+  text-align: right;
+}
+
+.angebot-doc .doc-sender h3,
+.angebot-doc .doc-sender p {
+  margin: 0;
+  font-size: 7.5pt;
+  font-family: inherit;
+  font-weight: 400;
+  color: inherit;
+}
+
+.angebot-doc .doc-sender h3 {
+  font-weight: 700;
+  color: var(--doc-text);
+}
+
+/* Text */
+
+.angebot-doc h1,
+.angebot-doc h2,
+.angebot-doc h3 {
+  font-family: 'Angebot Josefin Sans', 'Josefin Sans', Arial, sans-serif;
+  color: var(--doc-text);
+  line-height: 1.2;
+  break-after: avoid;
+}
+
+.angebot-doc h1 {
+  font-size: 26pt;
+  font-weight: 600;
+  margin: 0 0 5mm;
+}
+
+.angebot-doc h2 {
+  font-size: 15pt;
+  font-weight: 600;
+  margin: 9mm 0 3mm;
+}
+
+.angebot-doc h3 {
+  font-size: 11pt;
+  font-weight: 700;
+  margin: 6mm 0 2mm;
+}
+
+.angebot-doc p {
+  margin: 0 0 2.5mm;
+}
+
+.angebot-doc ul,
+.angebot-doc ol {
+  margin: 0 0 3mm;
+  padding-left: 5mm;
+}
+
+.angebot-doc li {
+  margin: 0 0 1mm;
+}
+
+.angebot-doc li > p {
+  margin: 0;
+}
+
+.angebot-doc blockquote {
+  margin: 0 0 3mm;
+  padding: 2mm 4mm;
+  border-left: 2pt solid var(--doc-accent);
+  background: var(--doc-surface);
+}
+
+.angebot-doc hr {
+  border: 0;
+  border-top: 0.75pt solid var(--doc-line);
+  margin: 6mm 0;
+}
+
+.angebot-doc a {
+  color: inherit;
+}
+
+.angebot-doc .align-center { text-align: center; }
+.angebot-doc .align-right { text-align: right; }
+.angebot-doc .align-justify { text-align: justify; }
+
+.angebot-doc .page-break {
+  break-after: page;
+  height: 0;
+}
+
+/* Tables written in the editor (e.g. timeline) and bound tables */
+
+.angebot-doc table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 4mm;
+  break-inside: auto;
+}
+
+.angebot-doc tr {
+  break-inside: avoid;
+}
+
+.angebot-doc th,
+.angebot-doc td {
+  padding: 1.8mm 2.5mm;
+  border-bottom: 0.75pt solid var(--doc-line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.angebot-doc th {
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--doc-muted);
+  border-bottom-color: var(--doc-text);
+}
+
+.angebot-doc th p,
+.angebot-doc td p {
+  margin: 0;
+}
+
+.angebot-doc .num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Offer meta (number, dates, addresses) */
+
+.angebot-doc .doc-meta {
+  margin: 0 0 8mm;
+}
+
+.angebot-doc .doc-meta-line {
+  font-size: 8.5pt;
+  color: var(--doc-muted);
+  margin: 0 0 6mm;
+}
+
+.angebot-doc .doc-meta-columns {
+  display: flex;
+  gap: 10mm;
+}
+
+.angebot-doc .doc-meta-columns > div {
+  flex: 1;
+}
+
+.angebot-doc .doc-label {
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--doc-accent);
+  margin: 0 0 1.5mm;
+}
+
+.angebot-doc .doc-address h3,
+.angebot-doc .doc-address p {
+  margin: 0;
+  font-family: inherit;
+  font-size: 9.5pt;
+  font-weight: 400;
+}
+
+/* Work packages */
+
+.angebot-doc .doc-package {
+  margin: 0 0 7mm;
+  break-inside: avoid;
+}
+
+.angebot-doc .doc-package h3 {
+  margin-top: 0;
+}
+
+.angebot-doc .doc-package .doc-quantity {
+  font-size: 8.5pt;
+  color: var(--doc-muted);
+}
+
+.angebot-doc .doc-sum td {
+  font-weight: 700;
+  border-bottom: 0;
+}
+
+/* Cost overview */
+
+.angebot-doc .doc-costs td {
+  border-bottom-color: var(--doc-line);
+}
+
+.angebot-doc .doc-costs .doc-subtotal td {
+  border-top: 0.75pt solid var(--doc-text);
+}
+
+.angebot-doc .doc-costs .doc-total td {
+  font-size: 11pt;
+  font-weight: 700;
+  border-top: 1.5pt solid var(--doc-text);
+  border-bottom: 0;
+}
+
+/* Hosting packages */
+
+.angebot-doc .doc-hosting .doc-recommended td {
+  background: var(--doc-surface);
+}
+
+.angebot-doc .doc-badge {
+  display: inline-block;
+  margin-left: 2mm;
+  padding: 0.3mm 1.6mm;
+  border-radius: 1mm;
+  font-size: 7pt;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--doc-accent);
+}
+
+.angebot-doc .doc-note {
+  font-size: 8.5pt;
+  color: var(--doc-muted);
+}
+
+/* Footer of each PDF page (Gotenberg footer.html); shown under the page in the editor */
+
+.angebot-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 8mm;
+  width: 100%;
+  padding: 0 20mm;
+  font-family: 'Angebot Lato', 'Lato', Arial, sans-serif;
+  font-size: 7pt;
+  line-height: 1.5;
+  color: #6b6b6b;
+}
+
+.angebot-footer .angebot-footer-page {
+  white-space: nowrap;
+  text-align: right;
+}

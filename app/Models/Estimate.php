@@ -5,6 +5,7 @@ namespace App\Models;
 use App;
 use App\Facades\PDF;
 use App\Mail\SendEstimateMail;
+use App\Services\EstimateDocument\DocumentRenderer;
 use App\Services\SerialNumberFormatter;
 use App\Space\PdfTemplateUtils;
 use App\Support\DocumentTotals;
@@ -67,6 +68,7 @@ class Estimate extends Model implements HasMedia
             'discount' => 'float',
             'discount_val' => 'integer',
             'exchange_rate' => 'float',
+            'document' => 'array',
         ];
     }
 
@@ -445,7 +447,49 @@ class Estimate extends Model implements HasMedia
             return view($templatePath);
         }
 
-        return PDF::loadView($templatePath);
+        return PDF::loadView($templatePath, $estimateTemplate, $this->getPdfOptions($templatePath, $company));
+    }
+
+    /**
+     * Gotenberg options for templates that bring their own page footer
+     * (a "footer" view next to the template, e.g. angebot-dokument/footer).
+     *
+     * @return array{footer?: string, margins?: array{0: string, 1: string, 2: string, 3: string}}
+     */
+    protected function getPdfOptions(string $templatePath, Company $company): array
+    {
+        $footer = $templatePath.'.footer';
+
+        if (! view()->exists($footer)) {
+            return [];
+        }
+
+        $address = $company->address;
+        $companyLine = collect([
+            $address?->address_street_1,
+            trim(($address?->zip ?? '').' '.($address?->city ?? '')),
+            $address?->phone,
+        ])->filter()->implode(' · ');
+
+        view()->share([
+            'company' => $company,
+            'companyLine' => $companyLine,
+            'footerLine' => (string) config('pdf.angebot_footer_line'),
+        ]);
+
+        return [
+            'footer' => $footer,
+            'margins' => ['15mm', '20mm', '0mm', '0mm'],
+        ];
+    }
+
+    /**
+     * The offer document as HTML, with positions and totals filled in from
+     * this estimate. Empty when the estimate has no document.
+     */
+    public function getDocumentHtml(): string
+    {
+        return (new DocumentRenderer($this))->render($this->document);
     }
 
     public function getCompanyAddress()

@@ -25,6 +25,8 @@ class EstimateResource extends JsonResource
             'tax_included' => $this->tax_included,
             'discount_per_item' => $this->discount_per_item,
             'notes' => $this->getNotes(),
+            // Raw on purpose: the editor must get back exactly what it saved.
+            'document' => $this->document,
             'discount' => $this->discount,
             'discount_type' => $this->discount_type,
             'discount_val' => $this->discount_val,
