@@ -110,6 +110,24 @@
   padding-left: 5mm;
 }
 
+/* Set explicitly: Tailwind's preflight removes list markers in the editor, the PDF has no
+   preflight. Without this, the editor shows lists without bullets or numbers. */
+.angebot-doc ul {
+  list-style: disc outside;
+}
+
+.angebot-doc ol {
+  list-style: decimal outside;
+}
+
+.angebot-doc ul ul {
+  list-style-type: circle;
+}
+
+.angebot-doc li::marker {
+  color: var(--doc-muted, currentColor);
+}
+
 .angebot-doc li {
   margin: 0 0 1mm;
 }
