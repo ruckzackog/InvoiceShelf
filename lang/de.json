@@ -1706,9 +1706,9 @@
     "form": "Formular",
     "mode_hint": "Positionen, Preise und Steuern bearbeiten Sie im Formular. Das Dokument zeigt sie live.",
     "edit_positions": "Positionen bearbeiten",
-    "insert_block": "Block",
-    "insert_baustein": "Baustein",
-    "insert_field": "Feld",
+    "insert_block": "Blöcke",
+    "insert_baustein": "Bausteine",
+    "insert_field": "Felder",
     "no_bausteine": "Noch keine Bausteine. Anlegen unter Einstellungen, Anpassung, Notizen, Art „Angebot-Baustein“.",
     "preview": "Vorschau",
     "save_and_preview": "Speichern und Vorschau",
@@ -1759,14 +1759,9 @@
     "hosting_recommended": "Empfehlung",
     "hosting_none": "Keine Empfehlung",
     "no_items": "Noch keine Positionen. Legen Sie sie im Formular an.",
-    "default_title": "Titel des Projekts",
-    "default_greeting": "Sehr geehrte Damen und Herren,",
-    "default_intro": "vielen Dank für Ihr Interesse. Auf Grundlage unseres Gesprächs haben wir das folgende Angebot erstellt.",
-    "default_scope": "Leistungsumfang",
-    "default_costs": "Kostenübersicht",
-    "default_acceptance": "Annahme",
-    "default_acceptance_text": "Bitte bestätigen Sie das Angebot mit Ihrer Unterschrift oder per E-Mail. Wir freuen uns auf die Zusammenarbeit.",
     "footer_preview": "Fußzeile mit Firmendaten und Seitenzahl im PDF",
-    "page_hint": "Seitenumbrüche sehen Sie genau in der Vorschau."
+    "page_hint": "Seitenumbrüche sehen Sie genau in der Vorschau.",
+    "insert": "Einfügen",
+    "form_hint_document": "Notiz und Zusatzfelder der alten Vorlage sind bei dieser Vorlage ausgeblendet. Der Text steht im Dokument."
   }
 }

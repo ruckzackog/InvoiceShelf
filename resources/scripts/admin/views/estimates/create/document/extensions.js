@@ -107,14 +107,9 @@ export const Field = Node.create({
   },
 })
 
-export const FIELD_KEYS = [
-  'PRIMARY_CONTACT_NAME',
-  'CONTACT_DISPLAY_NAME',
-  'ESTIMATE_NUMBER',
-  'ESTIMATE_DATE',
-  'ESTIMATE_EXPIRY_DATE',
-  'COMPANY_NAME',
-]
+// Offered in the insert menu. Number and dates are in the offer details block;
+// documents that already use other keys keep working (FieldView, renderer).
+export const FIELD_KEYS = ['PRIMARY_CONTACT_NAME', 'CONTACT_DISPLAY_NAME']
 
 export const BLOCK_TYPES = [
   'offerMeta',

@@ -353,3 +353,12 @@ test('Bausteine follow the customer text rules', function () {
             ->not->toMatch('/\b(ganzheitlich|maßgeschneidert|innovativ)/iu', $name);
     }
 });
+
+test('every Baustein the default layout uses is created by the command', function () {
+    $js = file_get_contents(resource_path('scripts/admin/views/estimates/create/document/defaultDocument.js'));
+    preg_match('/DEFAULT_BAUSTEINE = \[(.*?)\]/s', $js, $match);
+    preg_match_all("/'([^']+)'/", $match[1] ?? '', $names);
+
+    expect($names[1])->not->toBeEmpty()
+        ->each->toBeIn(array_keys(SeedAngebotBausteine::bausteine()));
+});

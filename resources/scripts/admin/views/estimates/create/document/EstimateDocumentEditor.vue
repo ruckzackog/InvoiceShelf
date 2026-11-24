@@ -62,31 +62,24 @@
           </template>
         </BaseDropdown>
 
-        <BaseDropdown width-class="w-64">
+        <BaseDropdown width-class="w-72">
           <template #activator>
-            <span class="doc-toolbar-menu">{{ $t('angebot_document.insert_block') }} ▾</span>
+            <span class="doc-toolbar-menu doc-toolbar-insert" @click="loadBausteine">
+              + {{ $t('angebot_document.insert') }} ▾
+            </span>
           </template>
+          <div class="doc-menu-section">{{ $t('angebot_document.insert_block') }}</div>
           <BaseDropdownItem v-for="type in BLOCK_TYPES" :key="type" @click="insertBlock(type)">
             {{ $t(`angebot_document.blocks.${type}`) }}
           </BaseDropdownItem>
-        </BaseDropdown>
-
-        <BaseDropdown width-class="w-64">
-          <template #activator>
-            <span class="doc-toolbar-menu" @click="loadBausteine">{{ $t('angebot_document.insert_baustein') }} ▾</span>
-          </template>
+          <div class="doc-menu-section">{{ $t('angebot_document.insert_baustein') }}</div>
           <BaseDropdownItem v-for="note in bausteine" :key="note.id" @click="insertBaustein(note)">
             {{ note.name }}
           </BaseDropdownItem>
           <p v-if="bausteineLoaded && !bausteine.length" class="px-4 py-2 text-xs text-gray-500">
             {{ $t('angebot_document.no_bausteine') }}
           </p>
-        </BaseDropdown>
-
-        <BaseDropdown width-class="w-56">
-          <template #activator>
-            <span class="doc-toolbar-menu">{{ $t('angebot_document.insert_field') }} ▾</span>
-          </template>
+          <div class="doc-menu-section">{{ $t('angebot_document.insert_field') }}</div>
           <BaseDropdownItem v-for="key in FIELD_KEYS" :key="key" @click="insertField(key)">
             {{ $t(`angebot_document.fields.${key}`) }}
           </BaseDropdownItem>
@@ -123,11 +116,11 @@
 
 <script setup>
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { EditorContent, useEditor } from '@tiptap/vue-3'
 import { useEstimateStore } from '@/scripts/admin/stores/estimate'
 import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useNotesStore } from '@/scripts/admin/stores/note'
+import { useItemStore } from '@/scripts/admin/stores/item'
 import { BLOCK_TYPES, FIELD_KEYS, documentExtensions } from './extensions'
 import defaultDocument from './defaultDocument'
 import '@/css/angebot-fonts.css'
@@ -139,10 +132,10 @@ defineProps({
 
 const emit = defineEmits(['edit-positions', 'preview'])
 
-const { t } = useI18n()
 const estimateStore = useEstimateStore()
 const companyStore = useCompanyStore()
 const notesStore = useNotesStore()
+const itemStore = useItemStore()
 
 const alignSymbols = { left: '⇤', center: '↔', right: '⇥' }
 
@@ -164,21 +157,24 @@ const editor = useEditor({
   },
 })
 
-let loaded = false
+let loading = false
 
-function loadDocument() {
-  if (loaded || !editor.value || estimateStore.isFetchingInitialSettings) {
+async function loadDocument() {
+  if (loading || !editor.value || estimateStore.isFetchingInitialSettings) {
+    return
+  }
+  loading = true
+
+  const document = estimateStore.newEstimate.document
+  if (document && document.type === 'doc') {
+    editor.value.commands.setContent(document, { emitUpdate: false })
     return
   }
 
-  let document = estimateStore.newEstimate.document
-  if (!document || document.type !== 'doc') {
-    document = defaultDocument(t)
-    estimateStore.newEstimate.document = document
-  }
-
-  editor.value.commands.setContent(document, { emitUpdate: false })
-  loaded = true
+  // New document: standard layout with the current Bausteine and hosting packages.
+  await Promise.all([loadBausteine(), loadItems()]).catch(() => {})
+  editor.value.commands.setContent(defaultDocument(bausteine.value, itemStore.items), { emitUpdate: false })
+  estimateStore.newEstimate.document = editor.value.getJSON()
 }
 
 watch([editor, () => estimateStore.isFetchingInitialSettings], loadDocument, { immediate: true })
@@ -202,10 +198,16 @@ function insertField(key) {
 const bausteine = ref([])
 const bausteineLoaded = ref(false)
 
+async function loadItems() {
+  if (!itemStore.items.length || itemStore.items.length < itemStore.totalItems) {
+    await itemStore.fetchItems({ limit: 'all' })
+  }
+}
+
 async function loadBausteine() {
   if (bausteineLoaded.value) return
   const response = await notesStore.fetchNotes({ type: 'EstimateBlock', limit: 100 })
-  bausteine.value = response.data.data
+  bausteine.value = [...response.data.data].sort((a, b) => a.name.localeCompare(b.name, 'de'))
   bausteineLoaded.value = true
 }
 
@@ -246,6 +248,20 @@ function insertBaustein(note) {
 
 .doc-toolbar-group:last-child {
   border-right: 0;
+}
+
+.doc-toolbar-insert {
+  font-weight: 600;
+  color: var(--color-primary-600) !important;
+}
+
+.doc-menu-section {
+  padding: 8px 16px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(156 163 175);
 }
 
 .doc-toolbar-end {

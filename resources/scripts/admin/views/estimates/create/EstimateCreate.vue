@@ -123,8 +123,16 @@
           "
         >
           <div class="relative w-full lg:w-1/2">
+            <!-- The document template has its text in the document: the notes and the
+                 custom fields of the old template do nothing there. v-if, not v-show:
+                 unmounted, they send nothing, so stored values stay as they are. -->
+            <p v-if="isDocumentTemplate" class="mb-6 text-sm text-gray-500">
+              {{ $t('angebot_document.form_hint_document') }}
+            </p>
+
             <!-- Estimate Custom Notes -->
             <NoteFields
+              v-if="!isDocumentTemplate"
               :store="estimateStore"
               store-prop="newEstimate"
               :fields="estimateNoteFieldList"
@@ -133,6 +141,7 @@
 
             <!-- Estimate Custom Fields -->
             <EstimateCustomFields
+              v-if="!isDocumentTemplate"
               type="Estimate"
               :is-edit="isEdit"
               :is-loading="isLoadingContent"
