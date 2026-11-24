@@ -85,7 +85,15 @@ test('create and load an estimate with a document', function () {
 
 test('update keeps the document unchanged on a round trip', function () {
     $estimate = documentEstimate(['document' => doc(paragraph('Erste Fassung'))]);
-    $document = doc(paragraph('Zweite Fassung'), ['type' => 'pageBreak'], ['type' => 'estimateTotals']);
+    $document = doc(
+        ['type' => 'paragraph', 'content' => [
+            ['type' => 'text', 'text' => 'Sehr geehrter Herr '],
+            ['type' => 'field', 'attrs' => ['key' => 'PRIMARY_CONTACT_NAME']],
+            ['type' => 'text', 'text' => ', '],
+        ]],
+        ['type' => 'pageBreak'],
+        ['type' => 'estimateTotals'],
+    );
 
     $payload = Estimate::factory()->raw([
         'estimate_number' => $estimate->estimate_number,

@@ -75,7 +75,35 @@
         :is-edit="isEdit"
       />
 
-      <BaseScrollPane>
+      <!-- Offer document (template angebot-dokument): Dokument and Formular views.
+           Both stay mounted: the form components compute the tax amounts. -->
+      <div v-if="isDocumentTemplate" class="flex flex-wrap items-center gap-4 mt-8 mb-4">
+        <div class="inline-flex p-1 bg-gray-100 rounded-lg">
+          <button
+            v-for="view in ['document', 'form']"
+            :key="view"
+            type="button"
+            :class="[
+              'px-4 py-1.5 text-sm font-medium rounded-md',
+              documentView === view ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700',
+            ]"
+            @click="documentView = view"
+          >
+            {{ $t(`angebot_document.${view}`) }}
+          </button>
+        </div>
+        <span class="text-sm text-gray-500">{{ $t('angebot_document.mode_hint') }}</span>
+      </div>
+
+      <EstimateDocumentEditor
+        v-if="isDocumentTemplate"
+        v-show="documentView === 'document'"
+        :is-edit="isEdit"
+        @edit-positions="documentView = 'form'"
+        @preview="previewDocument"
+      />
+
+      <BaseScrollPane v-show="!isDocumentTemplate || documentView === 'form'">
         <!-- Estimate Items -->
         <Items
           :currency="estimateStore.newEstimate.selectedCurrency"
@@ -133,6 +161,20 @@
         </div>
       </BaseScrollPane>
     </form>
+
+    <div
+      v-if="previewUrl"
+      class="fixed inset-0 z-50 flex flex-col bg-black/60"
+      @click.self="previewUrl = null"
+    >
+      <div class="flex items-center justify-between px-6 py-3 bg-white">
+        <span class="font-medium">{{ $t('angebot_document.preview_title') }}</span>
+        <BaseButton variant="primary-outline" type="button" @click="previewUrl = null">
+          {{ $t('angebot_document.close') }}
+        </BaseButton>
+      </div>
+      <iframe :src="previewUrl" class="flex-1 w-full bg-gray-200 border-0" />
+    </div>
   </BasePage>
 </template>
 
@@ -164,6 +206,7 @@ import SelectTemplateModal from '@/scripts/admin/components/modal-components/Sel
 import TaxTypeModal from '@/scripts/admin/components/modal-components/TaxTypeModal.vue'
 import ItemModal from '@/scripts/admin/components/modal-components/ItemModal.vue'
 import SalesTax from '@/scripts/admin/components/estimate-invoice-common/SalesTax.vue'
+import EstimateDocumentEditor from './document/EstimateDocumentEditor.vue'
 
 const estimateStore = useEstimateStore()
 const moduleStore = useModuleStore()
@@ -193,6 +236,26 @@ let pageTitle = computed(() =>
 )
 
 let isEdit = computed(() => route.name === 'estimates.edit')
+
+const DOCUMENT_TEMPLATE = 'angebot-dokument'
+const documentView = ref('document')
+const previewUrl = ref(null)
+
+const isDocumentTemplate = computed(
+  () => estimateStore.newEstimate.template_name === DOCUMENT_TEMPLATE
+)
+
+async function previewDocument() {
+  if (!isEdit.value) {
+    // A new estimate has no PDF yet: save it, the view page shows the PDF.
+    return submitForm()
+  }
+
+  const res = await submitForm({ stay: true })
+  if (res?.data?.data) {
+    previewUrl.value = `/estimates/pdf/${res.data.data.unique_hash}?v=${Date.now()}`
+  }
+}
 
 const salesTaxEnabled = computed(() => {
   return (
@@ -257,7 +320,9 @@ watch(
   {immediate: true}
 )
 
-async function submitForm() {
+async function submitForm(options = {}) {
+  const stay = options.stay === true
+
   v$.value.$touch()
 
   if (v$.value.$invalid) {
@@ -299,9 +364,12 @@ async function submitForm() {
   try {
     let res = await action(data)
 
-    if (res.data.data) {
+    if (res.data.data && !stay) {
       router.push(`/admin/estimates/${res.data.data.id}/view`)
     }
+
+    isSaving.value = false
+    return res
   } catch (err) {
     console.error(err)
   }

@@ -121,6 +121,8 @@ function getLabelNote(type) {
   switch (type) {
     case 'Estimate':
       return t('settings.customization.notes.types.estimate')
+    case 'EstimateBlock':
+      return t('settings.customization.notes.types.estimate_block')
     case 'Invoice':
       return t('settings.customization.notes.types.invoice')
     case 'Payment':
