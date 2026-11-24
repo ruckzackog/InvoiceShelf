@@ -55,9 +55,16 @@ function block(type, attrs = {}) {
   return `<div data-node="${type}"${data}></div>`
 }
 
-export default function defaultDocument(bausteine = [], items = [], contact = {}) {
-  const byName = Object.fromEntries(bausteine.map((note) => [note.name, note.notes]))
-  const baustein = (name) => byName[name] || ''
+/** The "du" version of a Baustein is a note named "<name> (du)". */
+export const DU_SUFFIX = ' (du)'
+
+export function bausteinFor(bausteine, name, address) {
+  const byName = Object.fromEntries(bausteine.map((note) => [note.name, note]))
+  return (address === 'du' && byName[name + DU_SUFFIX]) || byName[name] || null
+}
+
+export default function defaultDocument(bausteine = [], items = [], contact = {}, address = 'sie') {
+  const baustein = (name) => bausteinFor(bausteine, name, address)?.notes || ''
   const hostingIds = DEFAULT_HOSTING_PACKAGES
     .map((name) => items.find((item) => item.name === name)?.id)
     .filter(Boolean)
@@ -65,7 +72,7 @@ export default function defaultDocument(bausteine = [], items = [], contact = {}
   return [
     // Empty: the editor shows "Titel des Projekts" as a placeholder.
     '<h1></h1>',
-    block('offerMeta', contact),
+    block('offerMeta', { ...contact, address }),
     baustein('Einleitung'),
     '<h2>Leistungsumfang</h2>',
     '<p>Das Projekt ist in Arbeitspakete gegliedert. Jedes Paket nennt die enthaltenen Tätigkeiten und den Betrag.</p>',

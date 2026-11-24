@@ -68,6 +68,8 @@ export const OfferMeta = boundBlock('offerMeta', OfferMetaView, {
   contactName: '',
   contactEmail: '',
   contactPhone: '',
+  // "sie" or "du": which version of a Baustein gets inserted.
+  address: 'sie',
 })
 export const EstimateItems = boundBlock('estimateItems', ItemsView)
 export const EstimateTotals = boundBlock('estimateTotals', TotalsView)

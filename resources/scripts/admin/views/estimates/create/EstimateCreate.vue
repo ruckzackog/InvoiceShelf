@@ -12,7 +12,8 @@
 
   <OfferStartDialog
     v-if="showStartDialog && !isLoadingContent"
-    @choose="startOffer"
+    @new="startNew"
+    @copy="startCopy"
     @classic="startClassic"
   />
 
@@ -110,7 +111,11 @@
         :is-edit="isEdit"
       />
 
-      <EstimateDocumentEditor v-if="isDocumentTemplate" @open-settings="settingsOpen = true">
+      <EstimateDocumentEditor
+        v-if="isDocumentTemplate && !showStartDialog"
+        :initial-address="startAddress"
+        @open-settings="settingsOpen = true"
+      >
         <template #panel>
           <section class="doc-card doc-card--customer">
             <BaseCustomerSelectPopup
@@ -308,7 +313,7 @@ import EstimateDocumentEditor from './document/EstimateDocumentEditor.vue'
 import OfferStartDialog from './document/OfferStartDialog.vue'
 import ExchangeRateConverter from '@/scripts/admin/components/estimate-invoice-common/ExchangeRateConverter.vue'
 import { formatDocMoney } from './document/format'
-import { STARTERS } from './document/starters'
+import { FRAME_PACKAGES } from './document/starters'
 
 const estimateStore = useEstimateStore()
 const moduleStore = useModuleStore()
@@ -369,27 +374,27 @@ function money(cents) {
 
 const showStartDialog = ref(!isEdit.value && !route.query.template)
 
-async function startOffer(key) {
-  showStartDialog.value = false
-  estimateStore.newEstimate.template_name = DOCUMENT_TEMPLATE
+const startAddress = ref('sie')
 
-  const names = STARTERS[key]?.packages || []
-  if (!names.length) return
+/** New offer: the frame packages around the project-specific ones. */
+async function startNew(address) {
+  startAddress.value = address
+  estimateStore.newEstimate.template_name = DOCUMENT_TEMPLATE
 
   if (!itemStore.items.length || itemStore.items.length < itemStore.totalItems) {
     await itemStore.fetchItems({ limit: 'all' }).catch(() => {})
   }
 
   estimateStore.newEstimate.items = []
-  names.forEach((name, index) => {
-    const article = itemStore.items.find((item) => item.name === name)
-    estimateStore.addItem()
+  FRAME_PACKAGES.forEach((frame, index) => {
+    const article = itemStore.items.find((item) => item.name === frame.name)
     const price = article?.price || 0
+    estimateStore.addItem()
     estimateStore.updateItem({
       ...estimateStore.newEstimate.items[index],
       index,
-      name,
-      description: article?.description || null,
+      name: frame.name,
+      description: article?.description || frame.description,
       item_id: article?.id || null,
       unit_name: article?.unit?.name || null,
       price,
@@ -398,6 +403,21 @@ async function startOffer(key) {
       total: price,
     })
   })
+
+  showStartDialog.value = false
+}
+
+/**
+ * Copy of an existing offer (document, positions, template) with a new number
+ * and date, then open it. A full page load: the create page has no estimate.
+ */
+async function startCopy(id) {
+  try {
+    const response = await http.post(`/api/v1/estimates/${id}/clone`)
+    window.location.assign(`/admin/estimates/${response.data.data.id}/edit`)
+  } catch (err) {
+    console.error(err)
+  }
 }
 
 function startClassic() {

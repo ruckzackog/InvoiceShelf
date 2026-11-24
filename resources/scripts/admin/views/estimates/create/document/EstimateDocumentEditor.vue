@@ -113,7 +113,22 @@
           {{ $t('angebot_document.table') }}
         </button>
 
-        <h5 class="doc-card-subtitle">{{ $t('angebot_document.insert_baustein') }}</h5>
+        <div class="doc-card-subtitle doc-baustein-head">
+          <span>{{ $t('angebot_document.insert_baustein') }}</span>
+          <span class="doc-address-switch" role="radiogroup" :aria-label="$t('angebot_document.address.label')">
+            <button
+              v-for="option in ['sie', 'du']"
+              :key="option"
+              type="button"
+              role="radio"
+              :aria-checked="address === option"
+              :class="{ active: address === option }"
+              @click="setAddress(option)"
+            >
+              {{ $t(`angebot_document.address.${option}`) }}
+            </button>
+          </span>
+        </div>
         <button v-for="note in bausteine" :key="note.id" type="button" class="doc-insert-item" @click="insertBaustein(note)">
           {{ note.name }}
         </button>
@@ -154,9 +169,13 @@ import { useCompanyStore } from '@/scripts/admin/stores/company'
 import { useNotesStore } from '@/scripts/admin/stores/note'
 import { useItemStore } from '@/scripts/admin/stores/item'
 import { FIELD_KEYS, documentExtensions } from './extensions'
-import defaultDocument, { rememberedContact } from './defaultDocument'
+import defaultDocument, { DU_SUFFIX, bausteinFor, rememberedContact } from './defaultDocument'
 import '@/css/angebot-fonts.css'
 import '@/css/angebot-document.css'
+
+const props = defineProps({
+  initialAddress: { type: String, default: 'sie' },
+})
 
 const emit = defineEmits(['open-settings'])
 
@@ -223,15 +242,17 @@ async function loadDocument() {
   const document = estimateStore.newEstimate.document
   if (document && document.type === 'doc') {
     editor.value.commands.setContent(document, { emitUpdate: false })
+    readAddress()
     return
   }
 
   // New document: standard layout with the current Bausteine and hosting packages.
   await Promise.all([loadBausteine(), loadItems()]).catch(() => {})
-  editor.value.commands.setContent(defaultDocument(bausteine.value, itemStore.items, rememberedContact()), {
+  editor.value.commands.setContent(defaultDocument(allBausteine.value, itemStore.items, rememberedContact(), props.initialAddress), {
     emitUpdate: false,
   })
   estimateStore.newEstimate.document = editor.value.getJSON()
+  readAddress()
 }
 
 watch([editor, () => estimateStore.isFetchingInitialSettings], loadDocument, { immediate: true })
@@ -297,8 +318,39 @@ function insertField(key) {
   run((c) => c.insertContent({ type: 'field', attrs: { key } }))
 }
 
-const bausteine = ref([])
+const allBausteine = ref([])
 const bausteineLoaded = ref(false)
+
+// The list shows each Baustein once; its "du" version is picked on insert.
+const bausteine = computed(() => allBausteine.value.filter((note) => !note.name.endsWith(DU_SUFFIX)))
+
+// Sie or du, stored on the offer details block of the document.
+const address = ref('sie')
+
+function offerMetaNode() {
+  let found = null
+  editor.value?.state.doc.descendants((node, pos) => {
+    if (!found && node.type.name === 'offerMeta') found = { node, pos }
+  })
+  return found
+}
+
+function readAddress() {
+  address.value = offerMetaNode()?.node.attrs.address === 'du' ? 'du' : 'sie'
+}
+
+function setAddress(value) {
+  address.value = value
+  const meta = offerMetaNode()
+  if (!meta) return
+  editor.value
+    .chain()
+    .command(({ tr }) => {
+      tr.setNodeMarkup(meta.pos, undefined, { ...meta.node.attrs, address: value })
+      return true
+    })
+    .run()
+}
 
 async function loadItems() {
   if (!itemStore.items.length || itemStore.items.length < itemStore.totalItems) {
@@ -309,13 +361,14 @@ async function loadItems() {
 async function loadBausteine() {
   if (bausteineLoaded.value) return
   const response = await notesStore.fetchNotes({ type: 'EstimateBlock', limit: 100 })
-  bausteine.value = [...response.data.data].sort((a, b) => a.name.localeCompare(b.name, 'de'))
+  allBausteine.value = [...response.data.data].sort((a, b) => a.name.localeCompare(b.name, 'de'))
   bausteineLoaded.value = true
 }
 
 function insertBaustein(note) {
   // A copy: editing the Baustein later never changes an offer already written.
-  run((c) => c.insertContent(note.notes))
+  const version = bausteinFor(allBausteine.value, note.name, address.value) || note
+  run((c) => c.insertContent(version.notes))
 }
 </script>
 
@@ -375,6 +428,35 @@ function insertBaustein(note) {
   margin: 4px 0;
   font-size: 12px;
   color: rgb(107 114 128);
+}
+
+.doc-baustein-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.doc-address-switch {
+  display: inline-flex;
+  padding: 2px;
+  background: rgb(243 244 246);
+  border-radius: 999px;
+}
+
+.doc-address-switch button {
+  padding: 1px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: rgb(107 114 128);
+  border-radius: 999px;
+}
+
+.doc-address-switch button.active {
+  color: var(--color-primary-700);
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
 }
 
 .doc-insert-item {

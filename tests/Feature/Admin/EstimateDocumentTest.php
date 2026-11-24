@@ -375,6 +375,19 @@ test('every Baustein the default layout uses is created by the command', functio
         ->each->toBeIn(array_keys(SeedAngebotBausteine::bausteine()));
 });
 
+test('du versions belong to a Baustein and use no formal address', function () {
+    $bausteine = SeedAngebotBausteine::bausteine();
+
+    foreach ($bausteine as $name => $html) {
+        if (! str_ends_with($name, ' (du)')) {
+            continue;
+        }
+
+        expect(array_key_exists(substr($name, 0, -5), $bausteine))->toBeTrue($name)
+            ->and(strip_tags($html))->not->toMatch('/\b(Sie|Ihnen|Ihre[rmns]?)\b/u', $name);
+    }
+});
+
 test('a package with only a feature list prints one column', function () {
     $estimate = documentEstimate();
     $estimate->items()->first()->update(['description' => "Website-Paket inkl. 1 Jahr:\n- Website Design\n- Kostenlose Domain"]);

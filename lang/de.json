@@ -1791,15 +1791,21 @@
     },
     "start": {
       "title": "Neues Angebot",
-      "subtitle": "Womit möchten Sie beginnen? Arbeitspakete und Texte können Sie danach frei ändern.",
-      "website": "Website",
-      "shop": "Shop",
-      "custom": "Individuell",
-      "empty": "Leer",
-      "packages": "{count} Arbeitspakete",
-      "empty_hint": "Nur der Standardaufbau",
+      "new": "Neu schreiben",
+      "new_hint": "Mit Konzept und Workshop am Anfang und Test, Go-live und Einschulung am Ende. Dazwischen die Pakete für dieses Projekt.",
+      "new_button": "Angebot beginnen",
+      "copy": "Ähnliches Angebot kopieren",
+      "copy_hint": "Dokument und Pakete werden übernommen, mit neuer Nummer und neuem Datum.",
+      "search": "Kunde oder Nummer suchen",
+      "copying": "wird kopiert …",
+      "no_offers": "Keine Angebote gefunden.",
       "classic": "Ohne Dokument, klassisches Formular"
     },
-    "items_table": "Positionen als Tabelle"
+    "items_table": "Positionen als Tabelle",
+    "address": {
+      "label": "Anrede",
+      "sie": "Sie",
+      "du": "du"
+    }
   }
 }

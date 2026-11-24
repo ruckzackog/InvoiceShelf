@@ -1797,15 +1797,21 @@
     },
     "start": {
       "title": "New estimate",
-      "subtitle": "Where do you want to start? You can change work packages and text afterwards.",
-      "website": "Website",
-      "shop": "Shop",
-      "custom": "Custom",
-      "empty": "Empty",
-      "packages": "{count} work packages",
-      "empty_hint": "Standard layout only",
+      "new": "Write new",
+      "new_hint": "Starts with concept and workshop, ends with test, go-live and training. The project packages go in between.",
+      "new_button": "Start estimate",
+      "copy": "Copy a similar estimate",
+      "copy_hint": "Document and packages are copied, with a new number and date.",
+      "search": "Search customer or number",
+      "copying": "copying …",
+      "no_offers": "No estimates found.",
       "classic": "Without document, classic form"
     },
-    "items_table": "Items as a table"
+    "items_table": "Items as a table",
+    "address": {
+      "label": "Address",
+      "sie": "Sie",
+      "du": "du"
+    }
   }
 }
